@@ -13,10 +13,12 @@ order1 = OrderInput(
     delivery_type=48,
     item_type=2,
     item_quantity=1,
-    
+
     item_weight=0.5,
     amount_to_collect=1000,
     special_instruction="Please call before delivery"
+   
+
 )
 
 print("starting..")
