@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from . import models, schemas
-import uuid
+from app.utils.uuid import simple_uuid
 
 
 def get_products(db: Session, skip: int = 0, limit: int = 100):
@@ -15,7 +15,7 @@ def get_products(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_product(db: Session, name:str, price:float, details):
-    db_product = models.Product(id=str(uuid.uuid4()) ,name=name, price=price, details=details)
+    db_product = models.Product(id=simple_uuid(4) ,name=name, price=price, details=details)
     db.add(db_product)
     db.commit()
     db.refresh(db_product)

@@ -1,0 +1,10 @@
+delivery:
+  steadfast:
+    api_key: "dptfojmcrzwuiisyzpf7x3nij4q1wrw7"
+    secret_key: "wjpuscff3dyaug7szimfm5qy"
+
+another:
+  list:
+    - a
+    - b
+    - c
