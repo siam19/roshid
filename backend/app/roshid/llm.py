@@ -3,16 +3,11 @@ import json
 from pydantic import BaseModel
 from groq import Groq
 
-from app.roshid.ocr import get_text
-from app.roshid.classes import CustomerConfig
-
-
-
-
+from .ocr import get_text
+from .classes import CustomerConfig
 
 
 class LLM:
-
     GROQ_API_KEY="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"
     #TODO Create an environtment variable you lazy fuck
 
@@ -50,14 +45,15 @@ class LLM:
 
 
 
-# cust1 = CustomerConfig()
-# cust1.add_attribute("Email", "string", "The email of the user")
-# cust1.add_attribute("is_purni", "boolean", "Checks if the users name is Purnima or anythis starting with the letter 'P'")
-# cust1.add_attribute("is_roy", "boolean", "Checks if the users name is roy")
-# cust1.add_attribute("product_count", "number", "Number of products ordered")
-# cust1.add_attribute("notes", "string", "If the customer mentions any note about the delivery, otherwise keep it empty.")
+if __name__ == "__main__":
+    cust1 = CustomerConfig()
+    cust1.add_attribute("Email", "string", "The email of the user")
+    cust1.add_attribute("is_purni", "boolean", "Checks if the users name is Purnima or anythis starting with the letter 'P'")
+    cust1.add_attribute("is_roy", "boolean", "Checks if the users name is roy")
+    cust1.add_attribute("product_count", "number", "Number of products ordered")
+    cust1.add_attribute("notes", "string", "If the customer mentions any note about the delivery, otherwise keep it empty.")
 
 
-# llm = LLM("groq")
-# out = llm.extract(get_text("/home/bastok/projects/roshid/0.0/ss5.jpg"), customer_config=cust1)
-# print(out)
+    llm = LLM("groq")
+    out = llm.extract(get_text("/home/bastok/projects/roshid/0.0/ss6.jpg"), customer_config=cust1)
+    print(out)

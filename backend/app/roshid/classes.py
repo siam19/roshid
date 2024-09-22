@@ -2,7 +2,7 @@ from pydantic import BaseModel, ValidationError
 from typing import Literal, Optional
 import json
 
-from app.roshid.exceptions import RoshidAttributeError
+from .exceptions import RoshidAttributeError
 
 
 class Attribute(BaseModel):
@@ -14,6 +14,12 @@ class Attribute(BaseModel):
 
 
 class CustomerConfig:
+    '''
+    This class represents the data that is to be extracted. It doesnt hold
+    any customer data, but instead is used to generate prompts for the LLM to digest. 
+    The reasoning behind creating a different class for this is so that users can 
+    create and extract arbritary attributes from a screenshot.
+    '''
     def __init__(self) -> None:
         self.attributes: set[Attribute] = []
         self.attributes.append(Attribute(attribute_name="Name", datatype="string", description="Name of the customer"))
