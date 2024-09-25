@@ -3,6 +3,8 @@ anyio==4.4.0
 asttokens==2.4.1
 branca==0.7.2
 certifi==2024.7.4
+motor==3.6.0
+beanie==1.26.0
 charset-normalizer==3.3.2
 click==8.1.7
 comm==0.2.2
