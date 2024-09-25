@@ -1,0 +1,30 @@
+name: roshid-server
+
+services:
+  backend:
+    image: roshid-server/backend
+    build: ./backend
+    volumes:
+      - ./backend:/usr/src/app
+
+    expose:
+      - "3001"
+
+    ports:
+      - "8001:3001"
+    command: "python src/server.py"
+    environment:
+      - debug=true
+    env_file: "./.env"
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - 8002:27017
+    volumes:
+      - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container:
