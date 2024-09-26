@@ -6,7 +6,7 @@ Roshid is a community-driven, conversation-based social commerce platform. It is
     <img src="0.0/roshid-logo-bn.png"
         height="200">
 </p>
-<p align="center">Website:  <a href="roshid.com" alt="website"> Roshid.com</a>
+<p align="center">Website:  <a href="https://roshid.com" alt="website"> Roshid.com</a>
 </p>
 
 
