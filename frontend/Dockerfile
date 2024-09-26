@@ -1,12 +1,17 @@
 FROM node:22
 
-WORKDIR /home/node/app
+WORKDIR /app
 
-COPY package.json .
+COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+
+# Change ownership of the app directory to the node user
+RUN chown -R node:node /app
+
+USER node
+
 
 #RUN npm run build
 

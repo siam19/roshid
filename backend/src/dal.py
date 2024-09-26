@@ -129,13 +129,12 @@ class ProductDAL:
         return Product.from_doc(doc)
     
     async def create_product(self, product: Product, session=None) -> str:
-        product.product_id = simple_uuid(4)
+        #product.product_id = simple_uuid(4)
         response = await self._product_collection.insert_one(
             product.model_dump(),
             session=session,
         )
-        return {"product_id": product.product_id,
-                "inserted_id": str(response.inserted_id)}
+        return {"inserted_id": str(response.inserted_id)}
     
     async def delete_product(self, id: str | ObjectId, session=None) -> bool:
         response = await self._product_collection.delete_one(

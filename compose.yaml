@@ -1,6 +1,18 @@
 name: roshid-server
 
 services:
+  # caddy:
+  #   image: caddy
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #     - ./caddy-data:/data
+  #   ports:
+  #     - 80:80
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - frontend
+  #     - backend
+      
   backend:
     build: ./backend
     volumes:
@@ -8,33 +20,36 @@ services:
     expose:
       - "3001"
     ports:
-      - "8001:3001"
+      - "3001:3001"
     command: "python src/server.py"
     environment:
       - debug=true
     env_file: "./.env"
+  
+  frontend:
+    build: ./frontend
+    user: "node"
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+      - WDS_SOCKET_PORT=0
+    volumes:
+      - ./frontend/:/app
+      - /app/node_modules
+    expose:
+      - "5173"
+    ports:
+      - "3000:5173"
+    command: "npm run dev"
+
   mongodb_container:
     image: mongo:latest
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     ports:
-      - 8002:27017
+      - 5000:27017
     volumes:
       - mongodb_data_container:/data/db
-  frontend:
-    build: ./frontend
-    user: "node"
-    working_dir: /home/node/app
-    environment:
-      - NODE_ENV=development
-      - WDS_SOCKET_PORT=0
-    volumes:
-      - ./frontend/:/home/node/app
-    expose:
-      - "5173"
-    ports:
-      - "3000:5173"
-    command: "npm run dev"
 volumes:
   mongodb_data_container:
