@@ -2,15 +2,15 @@ FROM node:22
 
 WORKDIR /home/node/app
 
-COPY package*.json ./
+COPY package.json .
 
 RUN npm install
 
 COPY . .
 
-RUN npm run build
+#RUN npm run build
 
-RUN npm install -g http-server
+#RUN npm install -g http-server
 
 EXPOSE 5173
 
