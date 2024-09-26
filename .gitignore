@@ -3,7 +3,7 @@ venv/
 env/
 .venv/
 .env/
-
+*ipynb
 # Python cache files
 __pycache__/
 *.py[cod]

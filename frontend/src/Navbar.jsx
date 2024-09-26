@@ -12,9 +12,9 @@ const Link = ({ href, className, children, prefetch, ...props }) => (
 export default function Navbar() {
   return (
     <div className="flex items-center justify-between w-full top-0 py-8 px-10  bg-white dark:bg-gray-800">
-      <Link href="#" className="flex items-center gap-0">
+      <Link href="#" className="flex items-center gap-1">
         <MountainIcon className="h-8 w-5 fill-blue-600" />
-        <span className="text-lg font-semibold">Roshid</span>
+        <span className="text-xl font-medium text-slate-950">Roshid</span>
       </Link>
       <div className="hidden sm:flex flex-row w-1/3 justify-between">
         <Link href="/delivery" className="text-lg font-medium hover:underline underline-offset-4">

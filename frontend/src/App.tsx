@@ -15,7 +15,9 @@ function App() {
       <div className="navbar w-full top-0 ">
         <Navbar />
       </div>
-
+      <div className="content w-full">
+        <ProductList />
+      </div>
 
 
     </div>
