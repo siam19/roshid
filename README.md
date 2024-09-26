@@ -23,7 +23,7 @@ Roshid is a community-driven, conversation-based social commerce platform. It is
 ```bash
   cd roshid
 ```
-3. Create/update `.env` file in root directory of the project with your credentials.
+3 . Create/update `.env` file in root directory of the project with your credentials.
 
 4 . To run the application you must have [docker installed](https://docs.docker.com/engine/install/).
 ```bash
