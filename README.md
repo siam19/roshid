@@ -3,7 +3,7 @@
 
 Roshid is a community-driven, conversation-based social commerce platform. It is an open-source platform that automates the backend of your social media-based businesses.
 <p align="center">
-    <img src="0.0/roshid-logo-bn.png"
+    <img src="frontend\src\assets\roshid-logo-bn.png"
         height="200">
 </p>
 <p align="center">Website:  <a href="https://roshid.com" alt="website"> Roshid.com</a>
