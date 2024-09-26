@@ -22,6 +22,19 @@ services:
       - 8002:27017
     volumes:
       - mongodb_data_container:/data/db
-
+  frontend:
+    build: ./frontend
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=development
+      - WDS_SOCKET_PORT=0
+    volumes:
+      - ./frontend/:/home/node/app
+    expose:
+      - "5173"
+    ports:
+      - "3000:5173"
+    command: "npm run dev"
 volumes:
   mongodb_data_container:
