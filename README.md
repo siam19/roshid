@@ -23,13 +23,20 @@ Roshid is a community-driven, conversation-based social commerce platform. It is
 ```bash
   cd roshid
 ```
+
 3 . Pull `.env` file [template](https://gist.github.com/siam19/9789825d676d27ebc24212b51d127556) in root directory of the project. Fill it with your credentials. 
 
 ```bash
 curl -o .env https://gist.githubusercontent.com/siam19/9789825d676d27ebc24212b51d127556/raw/fa195912faece84ac55347c77271116b02e37bd2/roshid_env_file
 ```
-
-4 . To run the application you must have [docker installed](https://docs.docker.com/engine/install/).
+4. Install frontend packages and initiate shadcn. Delete pre existing `components.json`.
+```bash
+cd frontend
+npm install
+npx shadcn@latest init
+```
+style= new york, baseColor = zinc
+5 . To run the application you must have [docker installed](https://docs.docker.com/engine/install/).
 ```bash
   docker-compose up --build -d
 ```
