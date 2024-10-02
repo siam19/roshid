@@ -1,26 +1,25 @@
 import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import './App.css'
+import Layout from './Layout'
 
-
-import ProductList from './ProductList'
-import Navbar from './Navbar'
+import OrderPage from './pages/OrderPage'
+import StorePage from './pages/StorePage'
+import ViewsPage from './pages/ViewsPage'
 
 function App() {
   const [count, setCount] = useState(0)
+  const location = useLocation()
 
   return (
     <>
-    <div className="app h-screen">
-      <div className="navbar w-full top-0 ">
-        <Navbar />
-      </div>
-      <div className="content w-full">
-        <ProductList />
-      </div>
-
-
-    </div>
+      <Layout>
+        {location.pathname === '/' && <OrderPage />}
+        {location.pathname === '/order' && <OrderPage />}
+        {location.pathname === '/store' && <StorePage />}
+        {location.pathname === '/views' && <ViewsPage />}
+      </Layout>
     </>
   )
 }
