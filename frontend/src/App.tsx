@@ -14,12 +14,12 @@ function App() {
 
   return (
     <>
-      <Layout>
+
         {location.pathname === '/' && <OrderPage />}
         {location.pathname === '/order' && <OrderPage />}
         {location.pathname === '/store' && <StorePage />}
         {location.pathname === '/views' && <ViewsPage />}
-      </Layout>
+
     </>
   )
 }
