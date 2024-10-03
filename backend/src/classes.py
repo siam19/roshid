@@ -62,15 +62,22 @@ class Product(BaseModel):
     def to_doc(self) -> dict:
         return self.model_dump(by_alias=True)
 
+class ProductItem(BaseModel):
+    name: str
+    img: str
+    price: float
+    quantity: int
 
+    def total(self):
+        return self.price * self.quantity
+    
 class OrderTemplate(BaseModel):
-    customer_data: dict[str, str]
-    product_data: dict[str, Any]
+    roshid_id: str = Field(default_factory=lambda: simple_uuid(8))
+    status: str
+    customer_data: dict[str, str] 
+    cart_items: list[ProductItem]
+    base_price: float
 
-class Order(BaseModel):
-    order_id: str
-    created: str
-    last_updated: str
 
 
 class Attribute(BaseModel):
@@ -95,6 +102,22 @@ class CustomerConfig:
         self.attributes.append(Attribute(attribute_name="phone", datatype="string", description="Phone number mentioned by the customer in the format: '01X XXXX XXXX'", is_required=True))
         self.attributes.append(Attribute(attribute_name="instructions", datatype="string", description="Verbatim copy of any delivery instruction given by the customer. Enter N/A if no instructions are provided.", is_required=True))
     
+    @classmethod
+    def from_doc(cls, doc: dict) -> 'CustomerConfig':
+        """
+        Creates a CustomerConfig instance from a MongoDB document.
+        """
+        instance = cls()
+        instance.attributes = [
+            Attribute(
+                attribute_name=attr["attribute_name"],
+                datatype=attr["datatype"],
+                description=attr["description"],
+                is_required=attr["is_required"]
+            )
+            for attr in doc.get("attributes", [])
+        ]
+        return instance
     def generate_description(self) -> str:
         attribute_descriptions = [
             f"{attr.attribute_name} ({attr.datatype}): {attr.description or 'No description provided'}"
@@ -147,28 +170,17 @@ class CustomerConfig:
             ]
         }
 
-    @classmethod
-    def from_doc(cls, doc: dict) -> 'CustomerConfig':
-        """
-        Creates a CustomerConfig instance from a MongoDB document.
-        """
-        instance = cls()
-        instance.attributes = [
-            Attribute(
-                attribute_name=attr["attribute_name"],
-                datatype=attr["datatype"],
-                description=attr["description"],
-                is_required=attr["is_required"]
-            )
-            for attr in doc.get("attributes", [])
-        ]
-        return instance
+    
 
+class CustomerDataBaseModel(BaseModel):
+    name: str
+    address: str
+    phone: str
 
 
 class CustomerDataModel:
     @staticmethod
-    def generate_model(config: CustomerConfig) -> Type[BaseModel]:
+    def generate_model(config: CustomerConfig) -> Type[CustomerDataBaseModel]:
 
         '''Generates a Pydantic model based on the attributes in the CustomerConfig object
         Useage:
@@ -179,18 +191,19 @@ class CustomerDataModel:
         fields: dict[str, Any] = {}
         
         for attr in config.attributes:
-            python_type = str
-            if attr.datatype == "number":
-                python_type = float
-            elif attr.datatype == "boolean":
-                python_type = bool
-            
-            fields[attr.attribute_name] = (
-                python_type,
-                ... if attr.is_required else None
+            if attr.attribute_name not in ["name", "address", "phone"]:
+                python_type = str
+                if attr.datatype == "number":
+                    python_type = float
+                elif attr.datatype == "boolean":
+                    python_type = bool
+                
+                fields[attr.attribute_name] = (
+                    python_type,
+                    ... if attr.is_required else None
             )
-        
-        CustomerData = create_model("CustomerData", **fields)
+            
+        CustomerData = create_model("CustomerData", __base__=CustomerDataBaseModel, **fields)
         
         return CustomerData
 

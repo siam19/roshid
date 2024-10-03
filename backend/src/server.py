@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query, File, UploadFile
+import os
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile, Depends
 from fastapi.responses import FileResponse
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,7 @@ from datetime import datetime
 from bson import ObjectId
 
 from dal import ProductDAL, OrderDAL, DeliveryDAL, ConfigDAL
-from classes import Product, ProductVariant, Order, OrderTemplate, DeliveryConfig, CustomerDataModel, CustomerConfig
+from classes import Product, ProductVariant, ProductItem, OrderTemplate, DeliveryConfig, CustomerDataModel, CustomerConfig
 import asyncio
 
 DEBUG = True
@@ -21,26 +22,11 @@ MONGODB_URI = "mongodb://root:rootpassword@mongodb_container:27017/"
 
 # Global variable to hold the CustomerData model
 
-CustomerData = None
-
-async def initialize_customer_data():
-    global CustomerData
-    client = AsyncIOMotorClient(MONGODB_URI)
-    database = client.get_database("roshid")
-
-    config_list = database.get_collection("roshid_configs")
-    config_dal = ConfigDAL(config_list)
-
-    customer_config = await config_dal.get_customer_config()
-    CustomerData = CustomerDataModel.generate_model(customer_config)
-
-    client.close()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup:
-    await initialize_customer_data()
 
     client = AsyncIOMotorClient(MONGODB_URI)
     database = client.get_database("roshid")
@@ -82,63 +68,71 @@ app.add_middleware(
 
 @app.get("/test")
 async def test():
-    return app.customer_config.to_doc()
+    return [os.environ.get("STEADFAST_API_KEY"), os.environ.get("STEADFAST_SECRET_KEY")]
+
+async def initialize_customer_data_model():
+    customer_config = await app.config_dal.get_customer_config()
+    CustomerData = CustomerDataModel.generate_model(customer_config)
+    return CustomerData
 
 
 
 # Order endpoints
-@app.get("/orders")
-async def list_orders(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    status: Optional[str] = None,
-    limit: int = 10,
-    offset: int = 0
-) -> List[Order]:
-    return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
+# @app.get("/orders")
+# async def list_orders(
+#     start_date: Optional[datetime] = None,
+#     end_date: Optional[datetime] = None,
+#     status: Optional[str] = None,
+#     limit: int = 10,
+#     offset: int = 0
+# ) -> List[Order]:
+#     return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
 
 # order statuses for steadfast: pending, delivered_approval_pending, partial_delivered_approval_pending, cancelled_approval_pending
 # unknown_approval_pending, delivered, partial_delivered, cancelled, hold, in_review, unknown
 
 @app.get("/orders/{order_id}")
-async def get_order(order_id: str) -> Order:
+async def get_order(order_id: str):
     order = await app.order_dal.get_order(order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
 @app.post("/orders/create")
-async def create_order(customer_data: List[dict[str, Any]], products: List[str]):
-    #return await app.order_dal.create_order(customer_data, products)
-    pass
+async def create_order(
+    customer_data: dict[str, str],
+    products: List[ProductItem]):
+    
+    return await app.order_dal.create_order(customer_data, products)
 
-@app.put("/orders/{order_id}")
-async def update_order(order_id: str, order: Order):
-    updated_order = await app.order_dal.update_order(order_id, order)
-    if not updated_order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return updated_order
 
-@app.delete("/orders/{order_id}")
-async def delete_order(order_id: str):
-    deleted = await app.order_dal.delete_order(order_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"message": "Order deleted successfully"}
+# @app.put("/orders/{order_id}")
+# async def update_order(order_id: str, order: OrderTemplate):
+#     updated_order = await app.order_dal.update_order(order_id, order)
+#     if not updated_order:
+#         raise HTTPException(status_code=404, detail="Order not found")
+#     return updated_order
 
-@app.get("/orders/{order_id}/invoice")
-async def get_invoice(order_id: str):
-    invoice = await app.order_dal.get_invoice(order_id)
-    if not invoice:
-        raise HTTPException(status_code=404, detail="Invoice not found")
-    return invoice
+# @app.delete("/orders/{order_id}")
+# async def delete_order(order_id: str):
+#     deleted = await app.order_dal.delete_order(order_id)
+#     if not deleted:
+#         raise HTTPException(status_code=404, detail="Order not found")
+#     return {"message": "Order deleted successfully"}
 
-@app.get("/orders/{order_id}/status")
-async def get_order_status(order_id: str):
-    status = await app.order_dal.get_order_status(order_id)
-    if not status:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"status": status}
+# @app.get("/orders/{order_id}/invoice")
+# async def get_invoice(order_id: str):
+#     invoice = await app.order_dal.get_invoice(order_id)
+#     if not invoice:
+#         raise HTTPException(status_code=404, detail="Invoice not found")
+#     return invoice
+
+# @app.get("/orders/{order_id}/status")
+# async def get_order_status(order_id: str):
+#     status = await app.order_dal.get_order_status(order_id)
+#     if not status:
+#         raise HTTPException(status_code=404, detail="Order not found")
+#     return {"status": status}
 
 
 

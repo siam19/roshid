@@ -7,7 +7,7 @@ from typing import List, AsyncGenerator,Optional, Any
 from utils.uuid import simple_uuid
 from utils.exceptions import RoshidError, RoshidAttributeError
 
-from classes import Product, ProductVariant, Order, OrderTemplate, DeliveryConfig, CustomerConfig, CustomerDataModel
+from classes import Product, ProductVariant, ProductItem, OrderTemplate, DeliveryConfig, CustomerConfig, CustomerDataModel
 from datetime import datetime
 
 
@@ -83,39 +83,49 @@ class ConfigDAL:
 
 class OrderDAL:
     def __init__(self, order_collection: AsyncIOMotorCollection):
-        self.collection = order_collection
+        self._order_collection = order_collection
 
-    async def list_orders(self, start_date: Optional[datetime], end_date: Optional[datetime], 
-                          status: Optional[str], limit: int, offset: int) -> List[Order]:
-        # Retrieve a list of orders with optional filtering and pagination
-        pass
+    # async def list_orders(self, start_date: Optional[datetime], end_date: Optional[datetime], 
+    #                       status: Optional[str], limit: int, offset: int):
+    #     # Retrieve a list of orders with optional filtering and pagination
+    #     pass
 
-    async def get_order(self, order_id: str) -> Optional[Order]:
-        # Retrieve a single order by its ID
-        pass
+    async def get_order(self, order_id: str):
+        order = await self._order_collection.find_one({"roshid_id": order_id})
+        if not order:
+            return {"error": "Order not found"}
+        else:
+            return OrderTemplate(**order)
 
-    async def create_order(self, customer_data: dict[str, Any], products: List[str]) -> Order:
-        required = ['name','address', 'phone']
+    async def create_order(self, customer_data: dict[str, Any], products: List[ProductItem]):
+        roshid_id = simple_uuid(8)
+        order = OrderTemplate(
+            roshid_id=roshid_id,
+            status="pending",
+            customer_data=customer_data,
+            cart_items=products,
+            base_price= sum([p.total() for p in products]))
+        print(order.model_dump())
+        response = await self._order_collection.insert_one(order.model_dump())
+        
+        return {"inserted_id": str(response.inserted_id), **order.model_dump()}
 
-        if required in customer_data.keys():
-            self.collection.insert_one()
-        pass
 
-    async def update_order(self, order_id: str, order: Order) -> Optional[Order]:
-        # Update an existing order
-        pass
+    # async def update_order(self, order_id: str, order: Order) -> Optional[Order]:
+    #     # Update an existing order
+    #     pass
 
-    async def delete_order(self, order_id: str) -> bool:
-        # Delete an order by its ID
-        pass
+    # async def delete_order(self, order_id: str) -> bool:
+    #     # Delete an order by its ID
+    #     pass
 
-    async def get_invoice(self, order_id: str) -> Optional[dict]:
-        # Retrieve the invoice for a specific order
-        pass
+    # async def get_invoice(self, order_id: str) -> Optional[dict]:
+    #     # Retrieve the invoice for a specific order
+    #     pass
 
-    async def get_order_status(self, order_id: str) -> Optional[str]:
-        # Retrieve the status of a specific order
-        pass
+    # async def get_order_status(self, order_id: str) -> Optional[str]:
+    #     # Retrieve the status of a specific order
+    #     pass
 
 class DeliveryDAL:
     def __init__(self, collection):
