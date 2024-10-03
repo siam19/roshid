@@ -12,15 +12,36 @@ from datetime import datetime
 from bson import ObjectId
 
 from dal import ProductDAL, OrderDAL, DeliveryDAL, ConfigDAL
-from classes import Product, ProductVariant, Order, CustomerData, OrderTemplate, DeliveryConfig
+from classes import Product, ProductVariant, Order, OrderTemplate, DeliveryConfig, CustomerDataModel, CustomerConfig
+import asyncio
 
 DEBUG = True
 
 MONGODB_URI = "mongodb://root:rootpassword@mongodb_container:27017/"
 
+# Global variable to hold the CustomerData model
+
+CustomerData = None
+
+async def initialize_customer_data():
+    global CustomerData
+    client = AsyncIOMotorClient(MONGODB_URI)
+    database = client.get_database("roshid")
+
+    config_list = database.get_collection("roshid_configs")
+    config_dal = ConfigDAL(config_list)
+
+    customer_config = await config_dal.get_customer_config()
+    CustomerData = CustomerDataModel.generate_model(customer_config)
+
+    client.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup:
+    await initialize_customer_data()
+
     client = AsyncIOMotorClient(MONGODB_URI)
     database = client.get_database("roshid")
 
@@ -32,12 +53,15 @@ async def lifespan(app: FastAPI):
     product_list = database.get_collection("products")
     order_list = database.get_collection("orders")
     delivery_list = database.get_collection("delivery")
-    config_list = database.get_collection("config")
+    config_list = database.get_collection("roshid_configs")
 
     app.product_dal = ProductDAL(product_list)
     app.order_dal = OrderDAL(order_list)
     app.delivery_dal = DeliveryDAL(delivery_list)
-    app.config = ConfigDAL(config_list)
+
+    app.config_dal = ConfigDAL(config_list)
+    app.customer_config = await app.config_dal.get_customer_config()
+
     # Yield back to FastAPI Application:
     yield
 
@@ -54,7 +78,11 @@ app.add_middleware(
 )
 
 
+# Generates CustomerData Pydantic model from the config
 
+@app.get("/test")
+async def test():
+    return app.customer_config.to_doc()
 
 
 
@@ -69,6 +97,9 @@ async def list_orders(
 ) -> List[Order]:
     return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
 
+# order statuses for steadfast: pending, delivered_approval_pending, partial_delivered_approval_pending, cancelled_approval_pending
+# unknown_approval_pending, delivered, partial_delivered, cancelled, hold, in_review, unknown
+
 @app.get("/orders/{order_id}")
 async def get_order(order_id: str) -> Order:
     order = await app.order_dal.get_order(order_id)
@@ -77,7 +108,7 @@ async def get_order(order_id: str) -> Order:
     return order
 
 @app.post("/orders/create")
-async def create_order(customer_data: CustomerData, products: List[str]):
+async def create_order(customer_data: List[dict[str, Any]], products: List[str]):
     #return await app.order_dal.create_order(customer_data, products)
     pass
 
@@ -238,7 +269,7 @@ class CustomerDataFormat(BaseModel):
 
 @app.get("/configs/customer_data_format")
 async def get_customer_data_format():
-    format = await app.config.get_customer_data_format()
+    format = app.customer_config.to_doc()
     if not format:
         raise HTTPException(status_code=404, detail="Customer data format not found")
     return format

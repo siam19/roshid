@@ -7,7 +7,7 @@ from typing import List, AsyncGenerator,Optional, Any
 from utils.uuid import simple_uuid
 from utils.exceptions import RoshidError, RoshidAttributeError
 
-from classes import Product, ProductVariant, Order, CustomerData, OrderTemplate, DeliveryConfig
+from classes import Product, ProductVariant, Order, OrderTemplate, DeliveryConfig, CustomerConfig, CustomerDataModel
 from datetime import datetime
 
 
@@ -59,17 +59,19 @@ class ProductDAL:
     
     
 class ConfigDAL:
-    def __init__(self, collection):
-        self.collection = collection
+    def __init__(self, config_collection: AsyncIOMotorCollection):
+        self.collection = config_collection
 
-    async def get_customer_data_format(self):
-        # Retrieve the customer data format from the database
-        pass
+    
+    async def get_customer_config(self) -> CustomerConfig:
+        config_doc = await self.collection.find_one({"__config__": "CustomerConfig"})
+        return CustomerConfig.from_doc(config_doc)
+        
+    async def get_customer_data_model(self, customer_config: CustomerConfig):
+        # Generates a CustomerData model with attributes from customer config
+        return CustomerDataModel.generate_model(customer_config)
 
-    async def create_customer_data_format(self, format: dict[str, Any]):
-        # Create a new customer data format in the database
-        pass
-
+    
     async def update_customer_data_format(self, format: dict[str, Any]):
         # Update the existing customer data format in the database
         pass
@@ -80,8 +82,8 @@ class ConfigDAL:
 
 
 class OrderDAL:
-    def __init__(self, collection):
-        self.collection = collection
+    def __init__(self, order_collection: AsyncIOMotorCollection):
+        self.collection = order_collection
 
     async def list_orders(self, start_date: Optional[datetime], end_date: Optional[datetime], 
                           status: Optional[str], limit: int, offset: int) -> List[Order]:
@@ -92,8 +94,11 @@ class OrderDAL:
         # Retrieve a single order by its ID
         pass
 
-    async def create_order(self, customer_data: CustomerData, products: List[str]) -> Order:
-        # Create a new order with the given customer data and products
+    async def create_order(self, customer_data: dict[str, Any], products: List[str]) -> Order:
+        required = ['name','address', 'phone']
+
+        if required in customer_data.keys():
+            self.collection.insert_one()
         pass
 
     async def update_order(self, order_id: str, order: Order) -> Optional[Order]:

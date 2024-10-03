@@ -4,11 +4,11 @@ from bson import ObjectId
 from utils.uuid import simple_uuid
 import json
 from collections import OrderedDict
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, create_model
 from utils.exceptions import RoshidAttributeError
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Type
 from uuid import uuid4
 
 class ProductVariant(BaseModel):
@@ -62,6 +62,7 @@ class Product(BaseModel):
     def to_doc(self) -> dict:
         return self.model_dump(by_alias=True)
 
+
 class OrderTemplate(BaseModel):
     customer_data: dict[str, str]
     product_data: dict[str, Any]
@@ -73,6 +74,7 @@ class Order(BaseModel):
 
 
 class Attribute(BaseModel):
+    '''Attributes are the data that the user wants to extract from the text.'''
     attribute_name: str
     datatype: Literal['string', 'number', 'boolean']  # Restrict to specific values
     description: Optional[str] = None  # Description is optional
@@ -127,12 +129,72 @@ class CustomerConfig:
             schema[attb.attribute_name] = f"{attb.description} (type={attb.datatype}, mandatory_to_extract={attb.is_required})"
 
         return json.dumps(schema)
-    
-class CustomerData(BaseModel):
-    name: str
-    phone: str
-    address: str
-    instructions: str
+
+    def to_doc(self) -> dict:
+        """
+        Converts the CustomerConfig instance to a dictionary suitable for MongoDB storage.
+        """
+        return {
+            "__config__": "CustomerConfig",
+            "attributes": [
+                {
+                    "attribute_name": attr.attribute_name,
+                    "datatype": attr.datatype,
+                    "description": attr.description,
+                    "is_required": attr.is_required
+                }
+                for attr in self.attributes
+            ]
+        }
+
+    @classmethod
+    def from_doc(cls, doc: dict) -> 'CustomerConfig':
+        """
+        Creates a CustomerConfig instance from a MongoDB document.
+        """
+        instance = cls()
+        instance.attributes = [
+            Attribute(
+                attribute_name=attr["attribute_name"],
+                datatype=attr["datatype"],
+                description=attr["description"],
+                is_required=attr["is_required"]
+            )
+            for attr in doc.get("attributes", [])
+        ]
+        return instance
+
+
+
+class CustomerDataModel:
+    @staticmethod
+    def generate_model(config: CustomerConfig) -> Type[BaseModel]:
+
+        '''Generates a Pydantic model based on the attributes in the CustomerConfig object
+        Useage:
+            config = CustomerConfig()
+            CustomerData = CustomerDataModel.generate_model(config)
+        '''
+        
+        fields: dict[str, Any] = {}
+        
+        for attr in config.attributes:
+            python_type = str
+            if attr.datatype == "number":
+                python_type = float
+            elif attr.datatype == "boolean":
+                python_type = bool
+            
+            fields[attr.attribute_name] = (
+                python_type,
+                ... if attr.is_required else None
+            )
+        
+        CustomerData = create_model("CustomerData", **fields)
+        
+        return CustomerData
+
+
 
 class DeliveryConfig(BaseModel):
     vendor: str
