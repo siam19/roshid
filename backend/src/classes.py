@@ -73,7 +73,6 @@ class ProductItem(BaseModel):
     
 class OrderTemplate(BaseModel):
     roshid_id: str = Field(default_factory=lambda: simple_uuid(8))
-    status: str
     customer_data: dict[str, str] 
     cart_items: list[ProductItem]
     base_price: float
@@ -118,6 +117,7 @@ class CustomerConfig:
             for attr in doc.get("attributes", [])
         ]
         return instance
+    
     def generate_description(self) -> str:
         attribute_descriptions = [
             f"{attr.attribute_name} ({attr.datatype}): {attr.description or 'No description provided'}"

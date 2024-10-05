@@ -16,9 +16,7 @@ function App() {
     <>
 
         {location.pathname === '/' && <OrderPage />}
-        {location.pathname === '/order' && <OrderPage />}
-        {location.pathname === '/store' && <StorePage />}
-        {location.pathname === '/views' && <ViewsPage />}
+        
 
     </>
   )

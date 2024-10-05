@@ -85,10 +85,25 @@ class OrderDAL:
     def __init__(self, order_collection: AsyncIOMotorCollection):
         self._order_collection = order_collection
 
-    # async def list_orders(self, start_date: Optional[datetime], end_date: Optional[datetime], 
-    #                       status: Optional[str], limit: int, offset: int):
-    #     # Retrieve a list of orders with optional filtering and pagination
-    #     pass
+    async def list_orders(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, 
+                          status: Optional[str] = None, limit: int = 10, offset: int = 0):
+        # Retrieve a list of orders with optional filtering and pagination from _order_collection (mongodb)
+        query = {}
+        if start_date:
+            query["created_at"] = {"$gte": start_date}
+        if end_date:
+            if "created_at" in query:
+                query["created_at"]["$lte"] = end_date
+            else:
+                query["created_at"] = {"$lte": end_date}
+        if status:
+            query["status"] = status
+
+        cursor = self._order_collection.find(query).skip(offset).limit(limit)
+        orders = []
+        async for doc in cursor:
+            orders.append(OrderTemplate(**doc))
+        return orders
 
     async def get_order(self, order_id: str):
         order = await self._order_collection.find_one({"roshid_id": order_id})
@@ -110,7 +125,7 @@ class OrderDAL:
         
         return {"inserted_id": str(response.inserted_id), **order.model_dump()}
 
-
+    
     # async def update_order(self, order_id: str, order: Order) -> Optional[Order]:
     #     # Update an existing order
     #     pass

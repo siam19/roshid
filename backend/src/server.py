@@ -78,15 +78,15 @@ async def initialize_customer_data_model():
 
 
 # Order endpoints
-# @app.get("/orders")
-# async def list_orders(
-#     start_date: Optional[datetime] = None,
-#     end_date: Optional[datetime] = None,
-#     status: Optional[str] = None,
-#     limit: int = 10,
-#     offset: int = 0
-# ) -> List[Order]:
-#     return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
+@app.get("/orders")
+async def list_orders(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    status: Optional[str] = None,
+    limit: int = 10,
+    offset: int = 0
+) -> List[OrderTemplate]:
+    return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
 
 # order statuses for steadfast: pending, delivered_approval_pending, partial_delivered_approval_pending, cancelled_approval_pending
 # unknown_approval_pending, delivered, partial_delivered, cancelled, hold, in_review, unknown
