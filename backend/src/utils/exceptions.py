@@ -7,3 +7,7 @@ class RoshidError(Exception):
 class RoshidAttributeError(RoshidError):
     def __init__(self, message):
         super().__init__(message)
+
+class RoshidAPIKeyError(RoshidError):
+    def __init__(self, message) -> None:
+        super().__init__(message)

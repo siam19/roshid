@@ -9,6 +9,8 @@ import StorePage from './pages/StorePage.tsx'
 import ViewsPage from './pages/ViewsPage.tsx'
 import OrderInvoicePage from './pages/OrderInvoicePage.tsx'
 import NotFoundPage from './pages/NotFoundPage.tsx'
+import { Navigate } from 'react-router-dom'
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -25,7 +27,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/order',
-    element: <OrderPage />,
+    element: <Navigate to="/" />,
   },
   {
     path: '/orders/:roshid_id',

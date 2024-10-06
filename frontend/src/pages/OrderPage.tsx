@@ -12,9 +12,9 @@ function OrderPage() {
     <>
     <Layout>
     <div className="flex flex-col">
-    <div className="">
+    <div className="align-center">
       <NewOrderButton />
-    <div className="">
+    <div className="flex flex-col items-center my-12">
       <RecentOrders />
     </div>
     </div>

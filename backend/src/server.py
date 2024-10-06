@@ -123,6 +123,13 @@ async def create_order(order_request: CreateOrderRequest):
 #         raise HTTPException(status_code=404, detail="Order not found")
 #     return {"message": "Order deleted successfully"}
 
+@app.post("/order/delete/{order_id}")
+async def delete_order(order_id: str):
+    deleted = await app.order_dal.delete_order(order_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return {"message": "Order deleted successfully"}
+
 # @app.get("/orders/{order_id}/invoice")
 # async def get_invoice(order_id: str):
 #     invoice = await app.order_dal.get_invoice(order_id)
@@ -161,93 +168,99 @@ async def get_all_products() -> List[Product]:
     ]
     # return await app.product_dal.list_products()
 
-@app.get("/products/{product_id}")
-async def get_product(product_id: str) -> Product:
-    product = await app.product_dal.get_product(product_id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
+# @app.get("/products/{product_id}")
+# async def get_product(product_id: str) -> Product:
+#     product = await app.product_dal.get_product(product_id)
+#     if not product:
+#         raise HTTPException(status_code=404, detail="Product not found")
+#     return product
 
-@app.get("/products/batch")
-async def get_products_batch(product_ids: List[str] = Query(...)) -> List[Product]:
-    products = await app.product_dal.get_products_batch(product_ids)
-    return products
+# @app.get("/products/batch")
+# async def get_products_batch(product_ids: List[str] = Query(...)) -> List[Product]:
+#     products = await app.product_dal.get_products_batch(product_ids)
+#     return products
 
-@app.delete("/products/{product_id}")
-async def delete_product(product_id: str):
-    deleted = await app.product_dal.delete_product(product_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return {"message": "Product deleted successfully"}
+# @app.delete("/products/{product_id}")
+# async def delete_product(product_id: str):
+#     deleted = await app.product_dal.delete_product(product_id)
+#     if not deleted:
+#         raise HTTPException(status_code=404, detail="Product not found")
+#     return {"message": "Product deleted successfully"}
 
-@app.post("/products/create")
-async def create_product(product: Product) -> Product:
-    return await app.product_dal.create_product(product)
+# @app.post("/products/create")
+# async def create_product(product: Product) -> Product:
+#     return await app.product_dal.create_product(product)
 
-@app.put("/products/{product_id}")
-async def update_product(product_id: str, product: Product) -> Product:
-    updated_product = await app.product_dal.update_product(product_id, product)
-    if not updated_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return updated_product
+# @app.put("/products/{product_id}")
+# async def update_product(product_id: str, product: Product) -> Product:
+#     updated_product = await app.product_dal.update_product(product_id, product)
+#     if not updated_product:
+#         raise HTTPException(status_code=404, detail="Product not found")
+#     return updated_product
 
-@app.post("/products/{product_id}/image")
-async def add_product_image(product_id: str, image: UploadFile = File(...)):
-    success = await app.product_dal.add_product_image(product_id, image)
-    if not success:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return {"message": "Image added successfully"}
+# @app.post("/products/{product_id}/image")
+# async def add_product_image(product_id: str, image: UploadFile = File(...)):
+#     success = await app.product_dal.add_product_image(product_id, image)
+#     if not success:
+#         raise HTTPException(status_code=404, detail="Product not found")
+#     return {"message": "Image added successfully"}
 
-@app.get("/products/{product_id}/image")
-async def get_product_image(product_id: str):
-    image_path = await app.product_dal.get_product_image_path(product_id)
-    if not image_path:
-        raise HTTPException(status_code=404, detail="Product image not found")
-    return FileResponse(image_path)
+# @app.get("/products/{product_id}/image")
+# async def get_product_image(product_id: str):
+#     image_path = await app.product_dal.get_product_image_path(product_id)
+#     if not image_path:
+#         raise HTTPException(status_code=404, detail="Product image not found")
+#     return FileResponse(image_path)
 
 
 
 # Delivery API endpoints
-@app.get("/delivery")
-async def list_delivery_apis():
-    return await app.delivery_dal.list_delivery_apis()
+# @app.get("/delivery")
+# async def list_delivery_apis():
+#     return await app.delivery_dal.list_delivery_apis()
 
-@app.post("/delivery/add/{vendor}")
-async def create_delivery_config(vendor: str, config: DeliveryConfig):
-    return await app.delivery_dal.create_delivery_config(vendor, config)
+# @app.post("/delivery/add/{vendor}")
+# async def create_delivery_config(vendor: str, config: DeliveryConfig):
+#     return await app.delivery_dal.create_delivery_config(vendor, config)
 
-@app.post("/delivery/{vendor}/create")
-async def create_pickup_request(vendor: str, order_template: OrderTemplate):
-    return await app.delivery_dal.create_pickup_request(vendor, order_template)
-
-
-@app.delete("/delivery/{vendor}/{order_id}")
-async def cancel_pickup_request(vendor: str, order_id: str):
-    cancelled = await app.delivery_dal.cancel_pickup_request(vendor, order_id)
-    if not cancelled:
-        raise HTTPException(status_code=404, detail="Pickup request not found")
-    return {"message": "Pickup request cancelled successfully"}
-
-@app.get("/delivery/{vendor}/get_balance")
-async def get_delivery_balance(vendor: str):
-    balance = await app.delivery_dal.get_delivery_balance(vendor)
-    if balance is None:
-        raise HTTPException(status_code=404, detail="Vendor not found")
-    return {"balance": balance}
+# @app.post("/delivery/{vendor}/create")
+# async def create_pickup_request(vendor: str, order_template: OrderTemplate):
+#     return await app.delivery_dal.create_pickup_request(vendor, order_template)
 
 
+# @app.delete("/delivery/{vendor}/{order_id}")
+# async def cancel_pickup_request(vendor: str, order_id: str):
+#     cancelled = await app.delivery_dal.cancel_pickup_request(vendor, order_id)
+#     if not cancelled:
+#         raise HTTPException(status_code=404, detail="Pickup request not found")
+#     return {"message": "Pickup request cancelled successfully"}
+
+# @app.get("/delivery/{vendor}/get_balance")
+# async def get_delivery_balance(vendor: str):
+#     balance = await app.delivery_dal.get_delivery_balance(vendor)
+#     if balance is None:
+#         raise HTTPException(status_code=404, detail="Vendor not found")
+#     return {"balance": balance}
 
 
 
 
+
+from llm import LLM, get_text
+import json
+from typing import Annotated
 
 # Screenshot processing endpoint
 @app.post("/llm/extract/customer_data")
-async def extract_customer_data(file: UploadFile = File(...)):
-    # For now,return a placeholder response
-    return {"message": "Customer data extraction not implemented yet"}
-
-
+async def extract_customer_data(file: Annotated[bytes, File()]):
+    customer_config = app.customer_config
+    llm = LLM("groq")
+    ocr_text = get_text(file)
+    customer_data = llm.extract_customer_data(ocr_text, customer_config)
+    try:
+        return json.loads(customer_data)
+    except Exception as e:
+        return {"error": str(e)}
 
 
 

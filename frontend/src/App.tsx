@@ -9,7 +9,7 @@ import StorePage from './pages/StorePage'
 import ViewsPage from './pages/ViewsPage'
 
 function App() {
-  const [count, setCount] = useState(0)
+
   const location = useLocation()
 
   return (

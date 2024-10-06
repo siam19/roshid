@@ -133,9 +133,9 @@ class OrderDAL:
     #     # Update an existing order
     #     pass
 
-    # async def delete_order(self, order_id: str) -> bool:
-    #     # Delete an order by its ID
-    #     pass
+    async def delete_order(self, order_id: str) -> bool:
+        response = await self._order_collection.delete_one({"roshid_id": order_id})
+        return response.deleted_count == 1
 
     # async def get_invoice(self, order_id: str) -> Optional[dict]:
     #     # Retrieve the invoice for a specific order

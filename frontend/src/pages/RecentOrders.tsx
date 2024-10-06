@@ -38,11 +38,32 @@ export default function RecentOrders() {
   }, [])
 
   return (
-    <div className="space-y-4 w-2/3 rounded-xl">
-      <h2 className="text-2xl font-bold mb-4">Recent Orders</h2>
+    <div className="space-y-4 w-4/5 rounded-xl ">
+      <h2 className="text-2xl font-medium mb-4">Recent Orders</h2>
+      <div className="flex flex-row justify-center">
+      <div className="text-gray-400 w-11/12  text-sm flex items-center justify-around">
+          <div className="flex-1 mr-4">
+            <span className="font-medium">Roshid ID</span>
+          </div>
+          <div className="flex-1 mr-4">
+            <span className="font-medium">Customer Name</span>
+          </div>
+          <div className="flex-1 mr-4">
+            <span className="font-medium">Phone</span>
+          </div>
+          <div className="flex-1 mr-4">
+            <span className="font-medium">Amount</span>
+          </div>
+          <div className="flex-none">
+            <span className="font-medium">Status</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col-reverse gap-5">
       {orders.map(order => (
         <OrderSummary key={order.roshid_id} order={order} />
       ))}
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { X, Upload, Minus, Plus, Share2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -51,7 +51,15 @@ export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; on
       address: '',
       additionalInstructions: '',
     })
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [createdOrder, setCreatedOrder] = useState<Order | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [formErrors, setFormErrors] = useState({
+        name: '',
+        phone: '',
+        address: '',
+      })
 
 
   useEffect(() => {
@@ -63,11 +71,16 @@ export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; on
       })
       .catch(error => console.error('Error fetching products:', error))
   }, [])
+  
 
+
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    // Clear the error when the user starts typing
+    setFormErrors(prev => ({ ...prev, [name]: '' }))
+}
 
   const handleProductSelect = (product: Product) => {
     setSelectedProducts(prev => {
@@ -90,11 +103,106 @@ export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; on
     )
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File uploaded:', e.target.files)
-  }
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
 
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const blob = items[i].getAsFile();
+          if (blob) {
+            await processFile(blob);
+          }
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+    };
+}, []);
+
+const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+
+  const processFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploadedImage(URL.createObjectURL(file));
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/llm/extract/customer_data', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const data = await response.json();
+      setFormData({
+        name: data.name || '',
+        phone: data.phone || '',
+        address: data.address || '',
+        additionalInstructions: data.instructions || '',
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const validateForm = () => {
+    let errors = {
+        name: '',
+        phone: '',
+        address: '',
+    }
+    let isValid = true
+
+    if (!formData.name.trim()) {
+        errors.name = 'Name is required'
+        isValid = false
+    }
+
+    if (!formData.address.trim()) {
+        errors.address = 'Address is required'
+        isValid = false
+    }
+
+    if (!formData.phone.trim()) {
+        errors.phone = 'Phone number is required'
+        isValid = false
+
+    } else if (!/^\d{11,14}$/.test(formData.phone)) {
+        errors.phone = 'Phone number should be at least 11 digits'
+        isValid = false
+    }
+
+    setFormErrors(errors)
+    return isValid
+}
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processFile(file);
+  };
+  
+  
   const handleDraft = async () => {
+    if (!validateForm()) {
+        console.log('Form validation failed')
+        return
+    }
+
     const customerData = {
       name: formData.name,
       phone: formData.phone,
@@ -129,12 +237,18 @@ export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; on
     }
   }
 
+
   const handleConfirmPickup = () => {
+    if (!validateForm()) {
+        console.log('Form validation failed')
+        return
+    }
     console.log('Form data:', { customer_data: formData, products: selectedProducts, deliveryMethod })
   }
   
   const handleCloseInvoice = () => {
     setCreatedOrder(null)
+    window.location.href = '/';
     onClose()
   }
   if (!isOpen) return null
@@ -154,46 +268,70 @@ export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; on
           </Button>
         </div>
 
-        <div className="mb-6 flex justify-center">
-          <Button variant="outline" onClick={() => document.getElementById('fileUpload')?.click()}>
-            <Upload className="mr-2 h-4 w-4" /> Upload Screenshot
-          </Button>
-          <input
-            id="fileUpload"
-            type="file"
-            className="hidden"
-            onChange={handleFileUpload}
-            accept="image/*"
-          />
-        </div>
+        <div className="mb-6 flex flex-col justify-center items-center">
+        <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept="image/*"
+        className="hidden"
+        id="fileUpload"
+      />
+      <Button 
+        variant="outline" 
+        onClick={handleButtonClick} 
+        disabled={isProcessing}
+      >
+        <Upload className="mr-2 h-4 w-4" /> Upload Screenshot
+      </Button>
+      <p className="text-sm text-gray-500">
+        You can also paste an image using Ctrl+V (or Cmd+V on Mac)
+      </p>
+      {uploadedImage && (
+        <img src={uploadedImage} alt="Uploaded" className="max-w-xs mt-4" />
+      )}
+          </div>
 
-        <div className="space-y-4 mb-6">
-          <h3 className="text-lg font-semibold">Customer Information</h3>
-          <Input
-            name="name"
-            placeholder="Name"
-            value={formData.name}
-            onChange={handleInputChange}
-          />
-          <Input
-            name="phone"
-            placeholder="Phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-          />
-          <Input
-            name="address"
-            placeholder="Address"
-            value={formData.address}
-            onChange={handleInputChange}
-          />
-          <Textarea
-            name="additionalInstructions"
-            placeholder="Additional Instructions"
-            value={formData.additionalInstructions}
-            onChange={handleInputChange}
-          />
-        </div>
+          <div className={`space-y-4 mb-6 ${isProcessing ? 'cursor-not-allowed' : ''}`}>
+                    <h3 className="text-lg font-semibold">Customer Information</h3>
+                    <div>
+                        <Input
+                            name="name"
+                            placeholder="Name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            disabled={isProcessing}
+                        />
+                        {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
+                    </div>
+                    <div>
+                        <Input
+                            name="phone"
+                            placeholder="Phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            disabled={isProcessing}
+                        />
+                        {formErrors.phone && <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>}
+                    </div>
+                    <div>
+                        <Input
+                            name="address"
+                            placeholder="Address"
+                            value={formData.address}
+                            onChange={handleInputChange}
+                            disabled={isProcessing}
+                        />
+                        {formErrors.address && <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>}
+                    </div>
+                    <Textarea
+                        name="additionalInstructions"
+                        placeholder="Additional Instructions"
+                        value={formData.additionalInstructions}
+                        onChange={handleInputChange}
+                        disabled={isProcessing}
+                    />
+                </div>
 
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-2">Product Selection</h3>
