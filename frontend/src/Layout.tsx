@@ -9,7 +9,7 @@ const Layout = ({children}) => {
       <div className="navbar w-full top-0 ">
         <Navbar />
       </div>
-      <div className="content w-2/3 justify-center">
+      <div className="content w-full justify-center">
         {children}
       </div>
     </div>

@@ -8,7 +8,7 @@ from pydantic import BaseModel, ValidationError, create_model
 from utils.exceptions import RoshidAttributeError
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Any, Type
+from typing import List, Optional, Any, Type, Union
 from uuid import uuid4
 
 class ProductVariant(BaseModel):
@@ -64,18 +64,24 @@ class Product(BaseModel):
 
 class ProductItem(BaseModel):
     name: str
-    img: str
-    price: float
+    base_price: float
     quantity: int
 
     def total(self):
-        return self.price * self.quantity
+        return self.base_price * self.quantity
     
 class OrderTemplate(BaseModel):
     roshid_id: str = Field(default_factory=lambda: simple_uuid(8))
     customer_data: dict[str, str] 
     cart_items: list[ProductItem]
     base_price: float
+    delivery_method: Optional[Union[dict, str]] = None
+
+class CreateOrderRequest(BaseModel):
+    customer_data: dict[str, str]
+    delivery_method: Optional[Union[dict, str]]
+    cart_items: List[ProductItem]
+
 
 
 

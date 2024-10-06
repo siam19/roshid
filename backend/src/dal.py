@@ -2,7 +2,7 @@ from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
 
 from pydantic import BaseModel, ConfigDict
-from typing import List, AsyncGenerator,Optional, Any
+from typing import List, AsyncGenerator,Optional, Any, Union
 
 from utils.uuid import simple_uuid
 from utils.exceptions import RoshidError, RoshidAttributeError
@@ -112,15 +112,18 @@ class OrderDAL:
         else:
             return OrderTemplate(**order)
 
-    async def create_order(self, customer_data: dict[str, Any], products: List[ProductItem]):
+    async def create_order(self, customer_data: dict[str, Any], cart_items: List[ProductItem], delivery_method: Optional[Union[dict, str]]):
         roshid_id = simple_uuid(8)
         order = OrderTemplate(
             roshid_id=roshid_id,
             status="pending",
             customer_data=customer_data,
-            cart_items=products,
-            base_price= sum([p.total() for p in products]))
-        print(order.model_dump())
+            cart_items=cart_items,
+            delivery_method = delivery_method,
+            base_price= sum([p.total() for p in cart_items])
+            )
+        
+        print(order)
         response = await self._order_collection.insert_one(order.model_dump())
         
         return {"inserted_id": str(response.inserted_id), **order.model_dump()}

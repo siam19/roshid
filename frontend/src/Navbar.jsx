@@ -7,7 +7,7 @@ export default function Navbar() {
   return (
     <div className="flex items-center justify-between w-full top-0 py-8 px-10  bg-white">
       <NavLink to="/" className="flex items-center gap-1">
-        <MountainIcon className="h-8 w-5 fill-blue-600" />
+        <RoshidIcon className="h-8 w-5 fill-blue-600" />
         <span className="text-xl font-medium text-slate-950">Roshid</span>
       </NavLink>
       <div className="hidden sm:flex flex-row w-1/3 justify-between">
@@ -69,7 +69,7 @@ function MenuIcon(props) {
   )
 }
 
-function MountainIcon(props) {
+export function RoshidIcon(props) {
   return (
     <svg 
       {...props}

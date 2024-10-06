@@ -8,12 +8,12 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from bson import ObjectId
 
 from dal import ProductDAL, OrderDAL, DeliveryDAL, ConfigDAL
-from classes import Product, ProductVariant, ProductItem, OrderTemplate, DeliveryConfig, CustomerDataModel, CustomerConfig
+from classes import Product, ProductVariant, ProductItem, OrderTemplate, DeliveryConfig, CustomerDataModel, CustomerConfig, CreateOrderRequest
 import asyncio
 
 DEBUG = True
@@ -98,12 +98,15 @@ async def get_order(order_id: str):
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
+
 @app.post("/orders/create")
-async def create_order(
-    customer_data: dict[str, str],
-    products: List[ProductItem]):
+async def create_order(order_request: CreateOrderRequest):
     
-    return await app.order_dal.create_order(customer_data, products)
+    return await app.order_dal.create_order(
+        order_request.customer_data, 
+        order_request.cart_items, 
+        order_request.delivery_method
+    )
 
 
 # @app.put("/orders/{order_id}")
@@ -140,7 +143,23 @@ async def create_order(
 # Product endpoints
 @app.get("/products")
 async def get_all_products() -> List[Product]:
-    return await app.product_dal.get_all_products()
+    return [
+        {"name": "Black Tshirt",
+         "base_price": 650,
+         "weight_category": "parcel-1kg"
+        },
+        {"name": "Grey Pant (Jeans)",
+         "base_price": 1450,
+         "weight_category": "parcel-1kg"
+        },
+        {"name": "Cargo Pant",
+         "base_price": 1750,
+         "weight_category": "parcel-1kg"
+        },
+        
+
+    ]
+    # return await app.product_dal.list_products()
 
 @app.get("/products/{product_id}")
 async def get_product(product_id: str) -> Product:

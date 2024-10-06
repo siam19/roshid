@@ -7,9 +7,8 @@ import './index.css'
 import OrderPage from './pages/OrderPage.tsx'
 import StorePage from './pages/StorePage.tsx'
 import ViewsPage from './pages/ViewsPage.tsx'
+import OrderInvoicePage from './pages/OrderInvoicePage.tsx'
 import NotFoundPage from './pages/NotFoundPage.tsx'
-import OrderInvoice from './pages/OrderInvoice.tsx'
-
 const router = createBrowserRouter([
   {
     path: '/',
@@ -19,7 +18,6 @@ const router = createBrowserRouter([
   {
     path: '/store',
     element: <StorePage />,
-
   },
   {
     path: '/views',
@@ -28,16 +26,13 @@ const router = createBrowserRouter([
   {
     path: '/order',
     element: <OrderPage />,
-    children: [
-      {
-      path: '/order/:order_id',
-      element: <OrderInvoice />,
-    }
-  ]
   },
-  
-
+  {
+    path: '/orders/:roshid_id',
+    element: <OrderInvoicePage />,
+  },
 ])
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={router}>
