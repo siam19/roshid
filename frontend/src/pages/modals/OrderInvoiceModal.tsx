@@ -2,6 +2,7 @@ import React from 'react'
 import { X, Share2, Trash2, Edit2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import ShareInvoice from './InvoiceShare'
 
 interface CartItem {
     name: string
@@ -64,11 +65,9 @@ export default function OrderInvoice({ order, onClose }: OrderInvoiceProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
             <div className="bg-white h-2/3 text-left  rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl  ">Order Info<span className="bg-fuchsia-200 font-light text-sm my-auto rounded-full p-2">#{order.roshid_id}</span></h2>
+                    <h2 className="text-2xl  ">Order Info<span className="bg-fuchsia-200 font-light text-sm mb-4 hover:cursor-pointer mx-2 rounded-full p-2">#{order.roshid_id}</span></h2>
                     <div className="flex space-x-2">
-                        <Button variant="outline" size="icon" onClick={handleShare}>
-                            <Share2 className="h-4 w-4" />
-                        </Button>
+                    <ShareInvoice order_id={order.roshid_id} />
                         <Button variant="ghost" size="icon" onClick={onClose}>
                             <X className="h-6 w-6" />
                         </Button>

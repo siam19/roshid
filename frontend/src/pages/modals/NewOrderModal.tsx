@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Upload, Minus, Plus, Share2 } from 'lucide-react'
+import { X, Upload, Minus, Plus, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -261,7 +261,7 @@ const handleButtonClick = () => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">New Order</h2>
+          <h2 className="text-2xl font-medium">New Order</h2>
           
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-6 w-6" />
@@ -281,10 +281,17 @@ const handleButtonClick = () => {
         variant="outline" 
         onClick={handleButtonClick} 
         disabled={isProcessing}
+        hidden={isProcessing}
+        className='transition-all ease-in-out hover:py-10 hover:px-6 '
       >
         <Upload className="mr-2 h-4 w-4" /> Upload Screenshot
       </Button>
-      <p className="text-sm text-gray-500">
+
+      {/* <Button disabled hidden={isProcessing}>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      Extracting
+    </Button> */}
+      <p className="text-sm mt-2 text-gray-500">
         You can also paste an image using Ctrl+V (or Cmd+V on Mac)
       </p>
       {uploadedImage && (
@@ -293,7 +300,7 @@ const handleButtonClick = () => {
           </div>
 
           <div className={`space-y-4 mb-6 ${isProcessing ? 'cursor-not-allowed' : ''}`}>
-                    <h3 className="text-lg font-semibold">Customer Information</h3>
+                    <h3 className="text-lg font-medium">Customer Information</h3>
                     <div>
                         <Input
                             name="name"
@@ -334,7 +341,7 @@ const handleButtonClick = () => {
                 </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">Product Selection</h3>
+          <h3 className="text-lg font-medium mb-2">Product Selection</h3>
           <div className="grid grid-cols-2 gap-4">
             {products.map((product) => {
               const selectedProduct = selectedProducts.find(p => p.name === product.name)
@@ -345,7 +352,7 @@ const handleButtonClick = () => {
                   onClick={() => handleProductSelect(product)}
                 >
                   <CardContent className="p-4">
-                    <h4 className="font-semibold">{product.name}</h4>
+                    <h4 className="font-medium">{product.name}</h4>
                     <p className="text-sm text-gray-600">{product.base_price} TK</p>
                     {selectedProduct && (
                       <div className="flex items-center justify-between mt-2">
@@ -379,23 +386,32 @@ const handleButtonClick = () => {
             
           </div>
           {/* Display the sum of base_price*quantity for each product */}
-          <p className='font-semibold'>
-            Amount to Collect: {selectedProducts.reduce((total, product) => total + product.base_price * product.quantity, 0)} TK
+          <p className='font-medium text-right my-3'>
+            Amount to Collect: <span className='text-2xl  '>{selectedProducts.reduce((total, product) => total + product.base_price * product.quantity, 0)}</span> TK
           </p>
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">Delivery Method</h3>
+          <h3 className="text-lg font-medium mb-2">Delivery Method</h3>
           <div className="flex space-x-4">
             <Button
               variant={deliveryMethod === 'Steadfast' ? 'default' : 'outline'}
               onClick={() => setDeliveryMethod('Steadfast')}
+              className='focus:bg-green-600 focus:text-white hover:bg-green-600 hover:text-white py-5'
             >
               Steadfast
             </Button>
             <Button
               variant={deliveryMethod === 'None' ? 'default' : 'outline'}
               onClick={() => setDeliveryMethod('None')}
+              className='focus:bg-red-600 focus:text-white hover:bg-red-600 hover:text-white py-5'
+            >
+              Pathao Courier
+            </Button>
+            <Button
+              variant={deliveryMethod === 'None' ? 'default' : 'outline'}
+              onClick={() => setDeliveryMethod('None')}
+              className='focus:bg-gray-500 focus:text-white hover:bg-gray-500 hover:text-white py-5'
             >
               None
             </Button>
@@ -403,7 +419,7 @@ const handleButtonClick = () => {
         </div>
 
         <div className="flex justify-end space-x-4">
-          <Button variant="outline" onClick={handleDraft}>
+          <Button variant="outline" className='hover:bg-blue-800 hover:text-white' onClick={handleDraft}>
             Draft
           </Button>
           <Button onClick={handleConfirmPickup}>

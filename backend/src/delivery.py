@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dal import ConfigDAL
+import httpx
 import json
 
 class DeliveryAPI(ABC):
@@ -70,24 +70,27 @@ class SteadfastAPI(DeliveryAPI):
             print(f"An error occurred  while making the request: {e}")
             return None
 
+    def create_bulk_order(self):
+        return super().create_bulk_order()
+    def get_delivery_status(self):
+        return super().get_delivery_status()
 # Usage example:
-if __name__ == "__main__":
-    api_key = "dptfojmcrzwuiisyzpf7x3nij4q1wrw7"
-    secret_key = "wjpuscff3dyaug7szimfm5qy"
+# if __name__ == "__main__":
+#     
     
-    steadfast = SteadfastAPI(api_key, secret_key)
+#     steadfast = SteadfastAPI(api_key, secret_key)
     
-    order_result = steadfast.create_order(
-        invoice="INV-001",
-        recipient_name="Fahmidul Hasan",
-        recipient_phone="01785863769",
-        recipient_address="123 Main St, Dhaka, Bangladesh",
-        cod_amount="1000",
-        note="Please deliver during business hours"
-    )
+#     order_result = steadfast.create_order(
+#         invoice="INV-001",
+#         recipient_name="Fahmidul Hasan",
+#         recipient_phone="01785863769",
+#         recipient_address="123 Main St, Dhaka, Bangladesh",
+#         cod_amount="1000",
+#         note="Please deliver during business hours"
+#     )
     
-    if order_result:
-        print("Order created successfully:")
-        print(order_result)
-    else:
-        print("Failed to create order")
+#     if order_result:
+#         print("Order created successfully:")
+#         print(order_result)
+#     else:
+#         print("Failed to create order")

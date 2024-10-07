@@ -10,6 +10,8 @@ from utils.exceptions import RoshidError, RoshidAttributeError
 from classes import Product, ProductVariant, ProductItem, OrderTemplate, DeliveryConfig, CustomerConfig, CustomerDataModel
 from datetime import datetime
 
+from delivery import SteadfastAPI
+import os
 
 #DAL stands for Data Access Layer. The DAL is responsible for handling all interactions with the database.
 
@@ -146,24 +148,43 @@ class OrderDAL:
     #     pass
 
 class DeliveryDAL:
-    def __init__(self, collection):
+    
+    def __init__(self, collection: AsyncIOMotorCollection):
         self.collection = collection
 
-    async def list_delivery_apis(self) -> List[str]:
-        # Retrieve a list of all configured delivery APIs
-        pass
+    # async def list_delivery_apis(self) -> List[str]:
+    #     # Retrieve a list of all configured delivery APIs
+    #     pass
 
-    async def create_delivery_config(self, vendor: str, config: DeliveryConfig) -> DeliveryConfig:
-        # Create a new delivery configuration for a specific vendor
-        pass
+    # async def create_delivery_config(self, vendor: str, config: DeliveryConfig) -> DeliveryConfig:
+    #     # Create a new delivery configuration for a specific vendor
+    #     pass
 
     async def create_pickup_request(self, vendor: str, order_template: OrderTemplate) -> dict:
         # Create a pickup request with a specific vendor using the given order template
-        pass
+        customer_data = order_template.customer_data
+        base_price = order_template.base_price
 
-    async def cancel_pickup_request(self, vendor: str, order_id: str) -> bool:
-        # Cancel a pickup request for a specific vendor and order
-        pass
+        if vendor.lower() =='steadfast':
+            api_key = os.getenv("STEADFAST_API_KEY")
+            api_secret = os.getenv("STEADFAST_SECRET_KEY")
+            client = SteadfastAPI(api_key, api_secret)
+        
+        response = client.create_order(
+            invoice=order_template.roshid_id,
+            recipient_name=customer_data["name"],
+            recipient_phone=customer_data["phone"],
+            recipient_address=customer_data["address"], 
+            cod_amount=order_template.base_price + 60,
+            note=' '
+        )
+        
+        
+        return response
+
+    # async def cancel_pickup_request(self, vendor: str, order_id: str) -> bool:
+    #     # Cancel a pickup request for a specific vendor and order
+    #     pass
 
     async def get_delivery_balance(self, vendor: str) -> float:
         # Retrieve the current balance for a specific delivery vendor

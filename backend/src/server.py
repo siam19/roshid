@@ -223,9 +223,9 @@ async def get_all_products() -> List[Product]:
 # async def create_delivery_config(vendor: str, config: DeliveryConfig):
 #     return await app.delivery_dal.create_delivery_config(vendor, config)
 
-# @app.post("/delivery/{vendor}/create")
-# async def create_pickup_request(vendor: str, order_template: OrderTemplate):
-#     return await app.delivery_dal.create_pickup_request(vendor, order_template)
+@app.post("/delivery/pickup/{vendor}")
+async def create_pickup_request(vendor: str, order_template: OrderTemplate):
+    return await app.delivery_dal.create_pickup_request(vendor, order_template)
 
 
 # @app.delete("/delivery/{vendor}/{order_id}")
