@@ -19,7 +19,10 @@ export default function ShareInvoice(props) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline"> <Share2 className="h-4 w-4 mr-2"/>Share</Button>
+        <Button variant="outline" onClick={props.handleClick}>
+          <Share2 className="h-4 w-4 mr-2" />
+          Share
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -35,12 +38,11 @@ export default function ShareInvoice(props) {
             </Label>
             <Input
               id="link"
-              // TODO FIX SHARABLE LINK
-              defaultValue="localhost/orders/{order_id}"
+              defaultValue={`localhost/orders/${props.order_id}`}
               readOnly
             />
           </div>
-          <Button type="submit" size="sm" className="px-3">
+          <Button type="submit" size="sm" className="px-3" onClick={props.handleShare}>
             <span className="sr-only">Copy</span>
             <CopyIcon className="h-4 w-4" />
           </Button>

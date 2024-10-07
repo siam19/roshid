@@ -13,6 +13,7 @@ def get_text(img: Annotated[bytes, File()]):
     image = Image.open(BytesIO(img))
     scanned_text = pytesseract.image_to_string(image)
     return scanned_text
+
 class LLM:
     
     def __init__(self, client="groq") -> None:

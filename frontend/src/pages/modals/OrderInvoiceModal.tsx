@@ -25,12 +25,20 @@ interface Order {
     }
 }
 
+interface DeliveryInfo {
+    deliveryMethod: string
+    deliveryCost: number
+    cod_amount: number
+    consignmentID: string
+    trackingCode: string
+}
 interface OrderInvoiceProps {
     order: Order
     onClose: () => void
+    deliveryInfo?: DeliveryInfo
 }
 
-export default function OrderInvoice({ order, onClose }: OrderInvoiceProps) {
+export default function OrderInvoice({ order, onClose, deliveryInfo }: OrderInvoiceProps) {
     const handleDelete = async () => {
         try {
             const response = await fetch(`/api/order/delete/${order.roshid_id}`, {
@@ -63,11 +71,11 @@ export default function OrderInvoice({ order, onClose }: OrderInvoiceProps) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
-            <div className="bg-white h-2/3 text-left  rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white h-4/5 text-left  rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-8">
                     <h2 className="text-2xl  ">Order Info<span className="bg-fuchsia-200 font-light text-sm mb-4 hover:cursor-pointer mx-2 rounded-full p-2">#{order.roshid_id}</span></h2>
                     <div className="flex space-x-2">
-                    <ShareInvoice order_id={order.roshid_id} />
+                    <ShareInvoice order_id={order.roshid_id} handleShare={handleShare} />
                         <Button variant="ghost" size="icon" onClick={onClose}>
                             <X className="h-6 w-6" />
                         </Button>
@@ -95,7 +103,7 @@ export default function OrderInvoice({ order, onClose }: OrderInvoiceProps) {
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-semibold mb-2">Order Items</h3>
+                        <h3 className="text-lg font-medium mb-2">Order Items</h3>
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -119,13 +127,16 @@ export default function OrderInvoice({ order, onClose }: OrderInvoiceProps) {
                     </div>
 
                     <div className="m-8 text-right">
-                    <span className='pr-1 text-md text-slate-700 font-bold'>Total:</span> <p className="text-2xl  text-slate-900 p-2  inline">{order.base_price} TK</p>
+                    <span className='pr-1 text-md text-slate-700 font-medium'>Total:</span> <p className="text-2xl  text-slate-900 p-2  inline">{order.base_price} TK</p>
                     </div>
 
                     {order.delivery_method && (
                         <div>
-                            <h3 className="text-lg font-semibold mb-2 ">Delivery</h3>
-                            <p><strong>Vendor:</strong> {order.delivery_method}</p>
+                            <h3 className="text-lg font-medium mb-2 ">Delivery</h3>
+                            <p>Delivery Charge: {deliveryInfo?.deliveryCost}</p>
+                            <p><span className="font-medium">Vendor:</span> <span  className='bg-green-400 p-2 py-1 text-sm text-green-950 rounded-full'>{deliveryInfo?.deliveryMethod}</span></p>
+                            <p>Consignment Page: <a className='text-blue-400' href={`https://steadfast.com.bd/user/consignment/${deliveryInfo?.consignmentID}`}>https://steadfast.com.bd/user/consignment/{deliveryInfo?.consignmentID}</a></p>
+                            <p>Tracking URL: <a className='text-blue-400' href={`https://steadfast.com.bd/t/${deliveryInfo?.trackingCode}`}>https://steadfast.com.bd/t/{deliveryInfo?.trackingCode}</a></p>
                         </div>
                     )}
                     

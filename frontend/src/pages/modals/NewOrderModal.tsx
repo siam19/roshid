@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import OrderInvoice from './OrderInvoiceModal'
+import { constrainedMemory } from 'process'
 
 interface Order {
     roshid_id: string
@@ -41,6 +42,14 @@ interface SelectedProduct {
   base_price: number
   quantity: number
 }
+interface DeliveryInfo {
+  deliveryMethod: string
+  deliveryCost: number
+  cod_amount: number
+  consignmentID: string
+  trackingCode: string
+}
+
 export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const [products, setProducts] = useState<Product[]>([])
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
@@ -60,6 +69,13 @@ export default function NewOrderModal({ isOpen, onClose }: { isOpen: boolean; on
         phone: '',
         address: '',
       })
+    const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
+      deliveryMethod: '',
+      deliveryCost: 0,
+      cod_amount: 0,
+      consignmentID: '',
+      trackingCode: '',
+    })
 
 
   useEffect(() => {
@@ -197,24 +213,26 @@ const handleButtonClick = () => {
   };
   
   
+  const customerData = {
+    name: formData.name,
+    phone: formData.phone,
+    address: formData.address,
+    instructions: formData.additionalInstructions,
+  }
+
+  const orderData = {
+    customer_data: customerData,
+    cart_items: selectedProducts,
+    base_price: selectedProducts.reduce((total, product) => total + product.base_price * product.quantity, 0),
+    delivery_method: deliveryMethod,
+  }
+
   const handleDraft = async () => {
     if (!validateForm()) {
         console.log('Form validation failed')
         return
     }
 
-    const customerData = {
-      name: formData.name,
-      phone: formData.phone,
-      address: formData.address,
-      instructions: formData.additionalInstructions,
-    }
-
-    const orderData = {
-      customer_data: customerData,
-      cart_items: selectedProducts,
-      delivery_method: deliveryMethod,
-    }
 
     try {
       console.log(JSON.stringify(orderData))
@@ -238,14 +256,80 @@ const handleButtonClick = () => {
   }
 
 
-  const handleConfirmPickup = () => {
+  const handleConfirmPickup = async () => {
     if (!validateForm()) {
         console.log('Form validation failed')
         return
     }
-    console.log('Form data:', { customer_data: formData, products: selectedProducts, deliveryMethod })
+    // console.log('Form data:', { customer_data: orderData.customer_data, products: orderData.cart_items, orderData.base_price,})
+
+    try {
+      const response = await fetch('/api/orders/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        console.log(response)
+      throw new Error('Failed to create order');
+      }
+
+      const createdOrder = await response.json();
+      console.log('Order created successfully:', createdOrder);
+
+        const deliveryRequestBody = JSON.stringify({
+            roshid_id: createdOrder.roshid_id,
+            customer_data: {
+            name: createdOrder.customer_data.name,
+            phone: createdOrder.customer_data.phone,
+            address: createdOrder.customer_data.address,
+            note: createdOrder.customer_data.instructions
+            },
+            cart_items: createdOrder.cart_items,
+            base_price: createdOrder.base_price,
+            delivery_method: createdOrder.delivery_method,
+        })
+      console.log(deliveryRequestBody)
+      const deliveryResponse = await fetch('/api/delivery/pickup/steadfast', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: deliveryRequestBody
+      })
+      
+      if (!deliveryResponse.ok) {
+        throw new Error('Failed to create delivery');
+      }
+      
+      const deliveryData = await deliveryResponse.json();
+      
+      console.log('Delivery created successfully:', deliveryData);
+      const consignment = deliveryData.consignment;
+
+        setDeliveryInfo({
+            deliveryMethod: deliveryMethod,
+            deliveryCost: 70,
+            cod_amount: consignment.cod_amount,
+            consignmentID: consignment.consignment_id,
+            trackingCode: consignment.tracking_code,
+        });
+        
+      console.log(deliveryInfo)      
+      
+      setCreatedOrder(createdOrder);
+    } catch (error) {
+      console.error('Error confirming pickup:', error);
+    }
   }
-  
+  //debugging
+  useEffect(() => {
+    console.log('Updated Delivery Info:', deliveryInfo);
+}, [deliveryInfo]);
+
   const handleCloseInvoice = () => {
     setCreatedOrder(null)
     window.location.href = '/';
@@ -254,7 +338,7 @@ const handleButtonClick = () => {
   if (!isOpen) return null
 
   if (createdOrder) {
-    return <OrderInvoice order={createdOrder} onClose={handleCloseInvoice} />
+    return <OrderInvoice order={createdOrder} deliveryInfo={deliveryInfo} onClose={handleCloseInvoice} />
   }
 
   return (
@@ -348,7 +432,7 @@ const handleButtonClick = () => {
               return (
                 <Card 
                   key={product.name}
-                  className={`cursor-pointer ${selectedProduct ? 'border-primary' : ''}`}
+                  className={`cursor-pointer hover:bg-blue-50 hover:border-indigo-500 hover:shadow transition-all ease-in-out duration-200 ${selectedProduct ? 'border-primary' : ''}`}
                   onClick={() => handleProductSelect(product)}
                 >
                   <CardContent className="p-4">
@@ -422,7 +506,7 @@ const handleButtonClick = () => {
           <Button variant="outline" className='hover:bg-blue-800 hover:text-white' onClick={handleDraft}>
             Draft
           </Button>
-          <Button onClick={handleConfirmPickup}>
+          <Button className="hover:bg-green-500 hover:text-green-950" onClick={handleConfirmPickup}>
             Confirm Pickup
           </Button>
         </div>
