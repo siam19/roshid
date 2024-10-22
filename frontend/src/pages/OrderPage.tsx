@@ -11,17 +11,17 @@ function OrderPage() {
     
     <>
     <Layout>
-    <div className="flex flex-col">
-    <div className="align-center">
-      <NewOrderButton />
-    <div className="flex flex-col items-center my-12">
-      <RecentOrders />
-    </div>
-    </div>
-    <div>
-      <Outlet />
-    </div>
-    </div>
+      <div className="flex flex-col">
+          <div className="align-center ">
+            <NewOrderButton />
+            <div className="flex flex-col items-center my-12">
+              <RecentOrders />
+            </div>
+          </div>
+        <div>
+          <Outlet />
+        </div>
+      </div>
     </Layout>
     </>
     

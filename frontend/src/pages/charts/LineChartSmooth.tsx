@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "An area chart with gradient fill"
+export const description = "An area chart showing sales trends over time"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -27,6 +27,12 @@ const chartData = [
   { month: "April", desktop: 73, mobile: 190 },
   { month: "May", desktop: 209, mobile: 130 },
   { month: "June", desktop: 214, mobile: 140 },
+  { month: "July", desktop: 194, mobile: 136 },
+  { month: "August", desktop: 64, mobile: 110 },
+  { month: "September", desktop: 184, mobile: 140 },
+  { month: "October", desktop: 174, mobile: 140 },
+  { month: "November", desktop: 144, mobile: 140 },
+  { month: "December", desktop: 124, mobile: 140 }
 ]
 
 const chartConfig = {
@@ -44,9 +50,9 @@ export default function LineChartSmooth() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Area Chart - Gradient</CardTitle>
+        <CardTitle>Sales Trends</CardTitle>
         <CardDescription>
-          Showing total visitors for the last 6 months
+          Comparing desktop and mobile sales for the past year
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -148,7 +148,11 @@ class OrderDAL:
     #     pass
 
 class DeliveryDAL:
-    
+    """
+    Acts as a Data Access Layer for the Delivery collection.
+    Attach the DeliveryDAL to the app instance as app.delivery_dal.
+
+    """
     def __init__(self, collection: AsyncIOMotorCollection):
         self.collection = collection
 
@@ -162,6 +166,15 @@ class DeliveryDAL:
 
     async def create_pickup_request(self, vendor: str, order_template: OrderTemplate) -> dict:
         # Create a pickup request with a specific vendor using the given order template
+        """
+
+        Args:
+            vendor (str): _description_
+            order_template (OrderTemplate): _description_
+
+        Returns:
+            dict: _description_
+        """
         customer_data = order_template.customer_data
         base_price = order_template.base_price
 
@@ -178,7 +191,6 @@ class DeliveryDAL:
             cod_amount=order_template.base_price + 60,
             note=' '
         )
-        
         
         return response
 

@@ -59,7 +59,7 @@ export default function RecentOrders() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col-reverse gap-5">
+      <div className="flex flex-col-reverse gap-4">
       {orders.map(order => (
         <OrderSummary key={order.roshid_id} order={order} />
       ))}

@@ -108,22 +108,23 @@ class CustomerConfig:
         self.attributes.append(Attribute(attribute_name="instructions", datatype="string", description="Verbatim copy of any delivery instruction given by the customer. Enter N/A if no instructions are provided.", is_required=True))
     
     @classmethod
-    def from_doc(cls, doc: dict) -> 'CustomerConfig':
+    def from_doc(cls, doc: dict | None) -> 'CustomerConfig':
         """
         Creates a CustomerConfig instance from a MongoDB document.
+        If no document is provided, returns a default configuration.
         """
         instance = cls()
-        instance.attributes = [
-            Attribute(
-                attribute_name=attr["attribute_name"],
-                datatype=attr["datatype"],
-                description=attr["description"],
-                is_required=attr["is_required"]
-            )
-            for attr in doc.get("attributes", [])
-        ]
+        if doc is not None and "attributes" in doc:
+            instance.attributes = [
+                Attribute(
+                    attribute_name=attr["attribute_name"],
+                    datatype=attr["datatype"],
+                    description=attr["description"],
+                    is_required=attr["is_required"]
+                )
+                for attr in doc["attributes"]
+            ]
         return instance
-    
     def generate_description(self) -> str:
         attribute_descriptions = [
             f"{attr.attribute_name} ({attr.datatype}): {attr.description or 'No description provided'}"

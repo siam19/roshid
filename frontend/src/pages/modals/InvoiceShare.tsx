@@ -1,3 +1,4 @@
+import React, { useState } from "react"
 import { CopyIcon } from "@radix-ui/react-icons"
 
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Share2 } from "lucide-react"
 
-export default function ShareInvoice(props) {
+export default function ShareInvoice(props: { handleClick: () => void; handleShare: () => void; order_id: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    props.handleShare()
+    setCopied(true)
+    setTimeout(() => setCopied(false), 3000) // Reset after 3 seconds
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -31,21 +40,26 @@ export default function ShareInvoice(props) {
             Anyone who has this link will be able to view this.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center space-x-2">
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="link" className="sr-only">
-              Link
-            </Label>
-            <Input
-              id="link"
-              defaultValue={`localhost/orders/${props.order_id}`}
-              readOnly
-            />
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="link" className="sr-only">
+                Link
+              </Label>
+              <Input
+                id="link"
+                defaultValue={`localhost/orders/${props.order_id}`}
+                readOnly
+              />
+            </div>
+            <Button type="submit" size="sm" className="px-3" onClick={handleCopy}>
+              <span className="sr-only">Copy</span>
+              <CopyIcon className="h-4 w-4" />
+            </Button>
           </div>
-          <Button type="submit" size="sm" className="px-3" onClick={props.handleShare}>
-            <span className="sr-only">Copy</span>
-            <CopyIcon className="h-4 w-4" />
-          </Button>
+          {copied && (
+            <p className="text-sm text-green-600">Link copied to clipboard!</p>
+          )}
         </div>
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>

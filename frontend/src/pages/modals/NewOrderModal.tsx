@@ -167,7 +167,8 @@ const handleButtonClick = () => {
         name: data.name || '',
         phone: data.phone || '',
         address: data.address || '',
-        additionalInstructions: data.instructions || '',
+        // additionalInstructions: data.instructions || '',
+        additionalInstructions: ' ' || '',
       });
     } catch (error) {
       console.error('Error processing file:', error);
@@ -343,16 +344,17 @@ const handleButtonClick = () => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-medium">New Order</h2>
-          
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-6 w-6" />
-          </Button>
-        </div>
+      <div className="bg-white rounded-2xl shadow-xl p-4 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex-grow overflow-y-auto p-6 ">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-medium">New Order</h2>
+            
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
 
-        <div className="mb-6 flex flex-col justify-center items-center">
+          <div className="mb-6 flex flex-col justify-center items-center">
         <input
         type="file"
         ref={fileInputRef}
@@ -366,7 +368,7 @@ const handleButtonClick = () => {
         onClick={handleButtonClick} 
         disabled={isProcessing}
         hidden={isProcessing}
-        className='transition-all ease-in-out hover:py-10 hover:px-6 '
+        className='transition-all ease-in-out duration-300 hover:py-10 hover:mb-10 bg-blue-200 text-blue-950 hover:bg-blue-100 rounded-lg hover:text-blue-900 hover:px-6 hover:shadow-lg my-4 py-5 px-4 '
       >
         <Upload className="mr-2 h-4 w-4" /> Upload Screenshot
       </Button>
@@ -418,7 +420,8 @@ const handleButtonClick = () => {
                     <Textarea
                         name="additionalInstructions"
                         placeholder="Additional Instructions"
-                        value={formData.additionalInstructions}
+                        // value={formData.additionalInstructions}
+                        value=''
                         onChange={handleInputChange}
                         disabled={isProcessing}
                     />
@@ -432,37 +435,39 @@ const handleButtonClick = () => {
               return (
                 <Card 
                   key={product.name}
-                  className={`cursor-pointer hover:bg-blue-50 hover:border-indigo-500 hover:shadow transition-all ease-in-out duration-200 ${selectedProduct ? 'border-primary' : ''}`}
+                  className={`cursor-pointer bg-slate-50 border-blue-200 bottom-1 hover:border-indigo-500 hover:py-2 shadow-lg hover:shadow transition-all ease-in-out duration-200 ${selectedProduct ? 'border-primary' : ''}`}
                   onClick={() => handleProductSelect(product)}
                 >
-                  <CardContent className="p-4">
-                    <h4 className="font-medium">{product.name}</h4>
-                    <p className="text-sm text-gray-600">{product.base_price} TK</p>
-                    {selectedProduct && (
-                      <div className="flex items-center justify-between mt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleQuantityChange(product.name, -1)
-                          }}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span>{selectedProduct.quantity}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleQuantityChange(product.name, 1)
-                          }}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
+                  <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                    <h4 className="font-medium text-center">{product.name}</h4>
+                    <p className="text-sm text-gray-600 text-center">{product.base_price} TK</p>
+                    <div className={`w-full overflow-hidden transition-all ease-in-out duration-300 ${selectedProduct ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+                      {selectedProduct && (
+                        <div className="flex items-center justify-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleQuantityChange(product.name, -1)
+                            }}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="mx-2">{selectedProduct.quantity}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleQuantityChange(product.name, 1)
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               )
@@ -470,9 +475,7 @@ const handleButtonClick = () => {
             
           </div>
           {/* Display the sum of base_price*quantity for each product */}
-          <p className='font-medium text-right my-3'>
-            Amount to Collect: <span className='text-2xl  '>{selectedProducts.reduce((total, product) => total + product.base_price * product.quantity, 0)}</span> TK
-          </p>
+          
         </div>
 
         <div className="mb-6">
@@ -481,34 +484,55 @@ const handleButtonClick = () => {
             <Button
               variant={deliveryMethod === 'Steadfast' ? 'default' : 'outline'}
               onClick={() => setDeliveryMethod('Steadfast')}
-              className='focus:bg-green-600 focus:text-white hover:bg-green-600 hover:text-white py-5'
+              className='bg-slate-100 text-slate-900 focus:bg-green-600 focus:text-white hover:bg-green-600 hover:text-white selected:bg-green-600 selected:text-white py-5'
             >
               Steadfast
             </Button>
             <Button
               variant={deliveryMethod === 'None' ? 'default' : 'outline'}
               onClick={() => setDeliveryMethod('None')}
-              className='focus:bg-red-600 focus:text-white hover:bg-red-600 hover:text-white py-5'
+              className='bg-slate-100 text-slate-900 focus:bg-red-600 focus:text-white hover:bg-red-600 hover:text-white py-5 selected:bg-red-600 selected:text-white'
             >
               Pathao Courier
             </Button>
             <Button
               variant={deliveryMethod === 'None' ? 'default' : 'outline'}
               onClick={() => setDeliveryMethod('None')}
-              className='focus:bg-gray-500 focus:text-white hover:bg-gray-500 hover:text-white py-5'
+              className='bg-slate-100 text-slate-900 focus:bg-gray-500 focus:text-white hover:bg-gray-500 hover:text-white py-5'
             >
               None
             </Button>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" className='hover:bg-blue-800 hover:text-white' onClick={handleDraft}>
+        </div>
+
+        <div className='flex flex-row justify-between items-center p-2 m-0'>
+          <div className="flex flex-col mx-4">
+            <p className='font-medium text-right text-sm opacity-60 '>
+              Amount to Collect:
+            </p>
+            <p className='text-2xl font-medium text-right'>
+              {selectedProducts.reduce((total, product) => total + product.base_price * product.quantity, 0)} <span className="text-sm text-gray-400">BDT</span>
+            </p>
+          </div>
+          <div className="mt-6 flex justify-between  space-x-4">
+          
+          <Button
+            variant="outline"
+            className='hover:shadow-xl shadow-sm  text-slate-100 bg-blue-600 hover:bg-blue-600 hover:text-white hover:scale-105 ease-in-out transition-transform duration-800 hover:py-5 py-5'
+            onClick={handleDraft}
+          >
             Draft
           </Button>
-          <Button className="hover:bg-green-500 hover:text-green-950" onClick={handleConfirmPickup}>
+          <Button
+            className="hover:shadow-xl shadow-sm   bg-green-400 hover:bg-green-400 text-green-950 hover:scale-105 ease-in-out transition-transform duration-800 hover:py-5 py-5"
+            onClick={handleConfirmPickup}
+            disabled={selectedProducts.length === 0}
+          >
             Confirm Pickup
           </Button>
+        </div>
         </div>
       </div>
     </div>

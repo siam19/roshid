@@ -85,10 +85,10 @@ export default function OrderInvoice({ order, onClose, deliveryInfo }: OrderInvo
                     
                     <div className="flex flex-row w-full justify-between">
                         <div>
-                            <p><strong>Name:</strong> {order.customer_data.name}</p>
-                            <p><strong>Phone:</strong> {order.customer_data.phone}</p>
-                            <p><strong>Address:</strong> {order.customer_data.address}</p>
-                            <p><strong>Instructions:</strong> {order.customer_data.instructions}</p>
+                            <p><span className="opacity-50 font-medium">Name:</span> {order.customer_data.name}</p>
+                            <p><span className="opacity-50 font-medium">Phone:</span> {order.customer_data.phone}</p>
+                            <p><span className="opacity-50 font-medium">Address:</span> {order.customer_data.address}</p>
+                            <p><span className="opacity-50 font-medium">Instructions:</span> {order.customer_data.instructions}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                             <Button variant="outline" size="icon" className='' onClick={() => {console.log("Not implemented")}}>
