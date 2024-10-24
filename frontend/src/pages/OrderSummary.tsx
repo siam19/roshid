@@ -23,7 +23,7 @@ export default function OrderSummary({ order }: OrderSummaryProps) {
   return (
     <>
       <div 
-        className="p-4 border-b  last:border-b-0 hover:bg-teal-100 rounded-xl hover:shadow-lg hover:my-1 hover:py-8   transition-all duration-200 bg-gray-50 cursor-pointer flex items-center justify-between"
+        className="p-4 border-b  last:border-b-0 hover:shadow-blue-100 shadow-transparent rounded-xl hover:shadow-lg hover:my-1 hover:py-8 hover:bg-blue-50   transition-all duration-200 bg-slate-50 cursor-pointer flex items-center justify-between"
         onClick={() => setShowInvoice(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -47,7 +47,7 @@ export default function OrderSummary({ order }: OrderSummaryProps) {
           <span className="text-sm">{order.base_price} <span className='text-teal-400'>৳</span></span>
         </div>
         <div className="flex-none">
-          <span className="text-sm font-light -ml-5 text-teal-600">Pending</span>
+          <span className="text-sm font-medium -ml-5 text-teal-600">Pending</span>
         </div>
       </div>
       {showInvoice && (
