@@ -1,23 +1,16 @@
-FROM node:22
-
+# Build stage
+FROM node:18 AS builder
 WORKDIR /app
-
 COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
 
-RUN npm install
-
-
-# Change ownership of the app directory to the node user
+# Development stage
+FROM node:18
+WORKDIR /app
+COPY --from=builder /app ./
 RUN chown -R node:node /app
-
 USER node
-
-
-#RUN npm run build
-
-#RUN npm install -g http-server
-
-EXPOSE 5173
-
-# Command to run the app
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
