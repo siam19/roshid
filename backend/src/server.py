@@ -18,16 +18,15 @@ import asyncio
 
 DEBUG = True
 
-MONGODB_URI = "mongodb://root:rootpassword@mongodb_container:27017/"
+# Get MONGODB_URI from environment variable
+MONGODB_URI = os.environ.get("MONGODB_URI")
 
 # Global variable to hold the CustomerData model
-
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup:
-
+    
     client = AsyncIOMotorClient(MONGODB_URI)
     database = client.get_database("roshid")
 
