@@ -12,7 +12,7 @@ from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from bson import ObjectId
 
-from dal import ProductDAL, OrderDAL, DeliveryDAL, ConfigDAL
+from dal import PagesDAL, ProductsDAL
 from classes import Product, ProductVariant, ProductItem, OrderTemplate, DeliveryConfig, CustomerDataModel, CustomerConfig, CreateOrderRequest
 import asyncio
 
@@ -40,12 +40,14 @@ async def lifespan(app: FastAPI):
     delivery_list = database.get_collection("delivery")
     config_list = database.get_collection("roshid_configs")
 
-    app.product_dal = ProductDAL(product_list)
-    app.order_dal = OrderDAL(order_list)
-    app.delivery_dal = DeliveryDAL(delivery_list)
+    app.pages_dal = PagesDAL(database.get_collection("pages"))
 
-    app.config_dal = ConfigDAL(config_list)
-    app.customer_config = await app.config_dal.get_customer_config()
+    app.product_dal = ProductsDAL(product_list)
+    # app.order_dal = OrderDAL(order_list)
+    # app.delivery_dal = DeliveryDAL(delivery_list)
+
+    # app.config_dal = ConfigDAL(config_list)
+    # app.customer_config = await app.config_dal.get_customer_config()
 
     # Yield back to FastAPI Application:
     yield
@@ -53,7 +55,7 @@ async def lifespan(app: FastAPI):
     # Shutdown:
     client.close()
 
-app = FastAPI(lifespan=lifespan, debug=DEBUG)
+app = FastAPI(lifespan=lifespan, debug=DEBUG, root_path="/api/")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -67,7 +69,8 @@ app.add_middleware(
 
 @app.get("/test")
 async def test():
-    return [os.environ.get("STEADFAST_API_KEY"), os.environ.get("STEADFAST_SECRET_KEY")]
+    # return [os.environ.get("STEADFAST_API_KEY"), os.environ.get("STEADFAST_SECRET_KEY")]
+    return [{"name": "abir"},{"name": "tanvir"}]
 
 async def initialize_customer_data_model():
     customer_config = await app.config_dal.get_customer_config()
@@ -76,36 +79,36 @@ async def initialize_customer_data_model():
 
 
 
-# Order endpoints
-@app.get("/orders")
-async def list_orders(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    status: Optional[str] = None,
-    limit: int = 10,
-    offset: int = 0
-) -> List[OrderTemplate]:
-    return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
+# # Order endpoints
+# @app.get("/orders")
+# async def list_orders(
+#     start_date: Optional[datetime] = None,
+#     end_date: Optional[datetime] = None,
+#     status: Optional[str] = None,
+#     limit: int = 10,
+#     offset: int = 0
+# ) -> List[OrderTemplate]:
+#     return await app.order_dal.list_orders(start_date, end_date, status, limit, offset)
 
-# order statuses for steadfast: pending, delivered_approval_pending, partial_delivered_approval_pending, cancelled_approval_pending
-# unknown_approval_pending, delivered, partial_delivered, cancelled, hold, in_review, unknown
+# # order statuses for steadfast: pending, delivered_approval_pending, partial_delivered_approval_pending, cancelled_approval_pending
+# # unknown_approval_pending, delivered, partial_delivered, cancelled, hold, in_review, unknown
 
-@app.get("/orders/{order_id}")
-async def get_order(order_id: str):
-    order = await app.order_dal.get_order(order_id)
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return order
+# @app.get("/orders/{order_id}")
+# async def get_order(order_id: str):
+#     order = await app.order_dal.get_order(order_id)
+#     if not order:
+#         raise HTTPException(status_code=404, detail="Order not found")
+#     return order
 
 
-@app.post("/orders/create")
-async def create_order(order_request: CreateOrderRequest):
+# @app.post("/orders/create")
+# async def create_order(order_request: CreateOrderRequest):
     
-    return await app.order_dal.create_order(
-        order_request.customer_data, 
-        order_request.cart_items, 
-        order_request.delivery_method
-    )
+#     return await app.order_dal.create_order(
+#         order_request.customer_data, 
+#         order_request.cart_items, 
+#         order_request.delivery_method
+#     )
 
 
 # @app.put("/orders/{order_id}")
@@ -122,12 +125,12 @@ async def create_order(order_request: CreateOrderRequest):
 #         raise HTTPException(status_code=404, detail="Order not found")
 #     return {"message": "Order deleted successfully"}
 
-@app.post("/order/delete/{order_id}")
-async def delete_order(order_id: str):
-    deleted = await app.order_dal.delete_order(order_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"message": "Order deleted successfully"}
+# @app.post("/order/delete/{order_id}")
+# async def delete_order(order_id: str):
+#     deleted = await app.order_dal.delete_order(order_id)
+#     if not deleted:
+#         raise HTTPException(status_code=404, detail="Order not found")
+#     return {"message": "Order deleted successfully"}
 
 # @app.get("/orders/{order_id}/invoice")
 # async def get_invoice(order_id: str):
@@ -146,26 +149,26 @@ async def delete_order(order_id: str):
 
 
 
-# Product endpoints
-@app.get("/products")
-async def get_all_products() -> List[Product]:
-    return [
-        {"name": "Black Tshirt",
-         "base_price": 650,
-         "weight_category": "parcel-1kg"
-        },
-        {"name": "Grey Pant (Jeans)",
-         "base_price": 1450,
-         "weight_category": "parcel-1kg"
-        },
-        {"name": "Cargo Pant",
-         "base_price": 1750,
-         "weight_category": "parcel-1kg"
-        },
+# # Product endpoints
+# @app.get("/products")
+# async def get_all_products() -> List[Product]:
+#     return [
+#         {"name": "Black Tshirt",
+#          "base_price": 650,
+#          "weight_category": "parcel-1kg"
+#         },
+#         {"name": "Grey Pant (Jeans)",
+#          "base_price": 1450,
+#          "weight_category": "parcel-1kg"
+#         },
+#         {"name": "Cargo Pant",
+#          "base_price": 1750,
+#          "weight_category": "parcel-1kg"
+#         },
         
 
-    ]
-    # return await app.product_dal.list_products()
+#     ]
+#     # return await app.product_dal.list_products()
 
 # @app.get("/products/{product_id}")
 # async def get_product(product_id: str) -> Product:
@@ -213,73 +216,117 @@ async def get_all_products() -> List[Product]:
 
 
 
-# Delivery API endpoints
-# @app.get("/delivery")
-# async def list_delivery_apis():
-#     return await app.delivery_dal.list_delivery_apis()
 
-# @app.post("/delivery/add/{vendor}")
-# async def create_delivery_config(vendor: str, config: DeliveryConfig):
-#     return await app.delivery_dal.create_delivery_config(vendor, config)
+@app.get("/users")
+async def get_users():
+    return {
+        "total": 2,
+        "users": [
 
-@app.post("/delivery/pickup/{vendor}")
-async def create_pickup_request(vendor: str, order_template: OrderTemplate):
-    return await app.delivery_dal.create_pickup_request(vendor, order_template)
+            {   "userId": "kolatoli-restaurant-bd23-45xc",
+                "pageUrl": "/kolatoli",
+                "businessName": "Kolatoli",
+                "phone": "+8801788592045",
+                "address": "123 Business Avenue, Suite 100, Farmgate, Dhaka 1215",
+                "settings": {
+                    "theme": {
+                        "name": "modern-dark",
+                        "font": "Roboto"
+                    },
+                    "customerConfig": {
+                        "extractionKeys": [
+                            {
+                                "valueTitle": "Invoice Number",
+                                "valueDescription": "Unique identifier for invoice tracking"
+                            }
+                        ]
+                    },
+                    "deliveryConfig": [
+                        {
+                            "name": "steadfast",
+                            "credentials": {
+                                "apiKey": "sf_prod_key_123"
+                            }
+                        }
+                    ]
+                }
+            },
+            {   "userId": "techstart-solutions-45ty-78op",
+                "pageUrl": "/techstart",
+                "businessName": "TechStart Solutions",
+                "phone": "+1-555-0456",
+                "address": "456 Innovation Drive, Gulshan-2, Dhaka",
+                "settings": {
+                    "theme": {
+                        "name": "light-minimal",
+                        "font": "Inter"
+                    },
+                    "customerConfig": {
+                        "extractionKeys": [
+                            {
+                                "valueTitle": "Client ID",
+                                "valueDescription": "Internal client reference number"
+                            }
+                        ]
+                    },
+                    "deliveryConfig": [
+                        {
+                            "name": "steadfast",
+                            "credentials": {
+                                "apiKey": "sf_prod_key_456",
+                                "region": "us-west"
+                            }
+                        },
+                        {
+                            "name": "express-courier",
+                            "credentials": {
+                                "username": "techstart",
+                                "apiToken": "ec_789xyz"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
 
 
-# @app.delete("/delivery/{vendor}/{order_id}")
-# async def cancel_pickup_request(vendor: str, order_id: str):
-#     cancelled = await app.delivery_dal.cancel_pickup_request(vendor, order_id)
-#     if not cancelled:
-#         raise HTTPException(status_code=404, detail="Pickup request not found")
-#     return {"message": "Pickup request cancelled successfully"}
-
-# @app.get("/delivery/{vendor}/get_balance")
-# async def get_delivery_balance(vendor: str):
-#     balance = await app.delivery_dal.get_delivery_balance(vendor)
-#     if balance is None:
-#         raise HTTPException(status_code=404, detail="Vendor not found")
-#     return {"balance": balance}
 
 
 
+@app.get("/pages/{user_id}")
+async def get_page(user_id: str):
+    pages = await app.pages_dal.get_pages(user_id)
+    return pages
+
+@app.get("/products/{product_id}")
+async def get_product(product_id:str):
+    res = await app.product_dal.get_product(product_id)
+    return res
 
 
-from llm import LLM, get_text
-import json
-from typing import Annotated
-
-# Screenshot processing endpoint
-@app.post("/llm/extract/customer_data")
-async def extract_customer_data(file: Annotated[bytes, File()]):
-    customer_config = app.customer_config
-    llm = LLM("groq")
-    ocr_text = get_text(file)
-    customer_data = llm.extract_customer_data(ocr_text, customer_config)
-    try:
-        return json.loads(customer_data)
-    except Exception as e:
-        return {"error": str(e)}
+@app.get("/products/user/{user_id}")
+async def get_user_product(user_id:str):
+    res = await app.product_dal.get_user_products(user_id)
+    print(res)
+    return res
 
 
+# from llm import LLM, get_text
+# import json
+# from typing import Annotated
 
-
-
-# Data Visualization endpoints (placeholders)
-@app.get("/stats/orders")
-async def get_orders_for_visualization():
-    # Placeholder for visualization logic
-    return {"message": "Orders visualization data endpoint"}
-
-@app.get("/stats/earnings/")
-async def get_earnings_data():
-    # Placeholder for earnings data logic
-    return {"message": "Earnings data endpoint"}
-
-@app.get("/stats/sheet/orders")
-async def get_orders_sheet():
-    # Placeholder for generating CSV
-    return {"message": "Orders sheet data endpoint"}
+# # Screenshot processing endpoint
+# @app.post("/llm/extract/customer_data")
+# async def extract_customer_data(file: Annotated[bytes, File()]):
+#     customer_config = app.customer_config
+#     llm = LLM("groq")
+#     ocr_text = get_text(file)
+#     customer_data = llm.extract_customer_data(ocr_text, customer_config)
+#     try:
+#         return json.loads(customer_data)
+#     except Exception as e:
+#         return {"error": str(e)}
 
 
 
@@ -287,40 +334,10 @@ async def get_orders_sheet():
 
 
 
-
-# Config endpoints
-class CustomerDataFormat(BaseModel):
-    format: Dict[str, Any]
-
-@app.get("/configs/customer_data_format")
-async def get_customer_data_format():
-    format = app.customer_config.to_doc()
-    if not format:
-        raise HTTPException(status_code=404, detail="Customer data format not found")
-    return format
-
-@app.post("/configs/customer_data_format")
-async def create_customer_data_format(format: CustomerDataFormat):
-    created_format = await app.config.create_customer_data_format(format.format)
-    return created_format
-
-@app.put("/configs/customer_data_format")
-async def update_customer_data_format(format: CustomerDataFormat):
-    updated_format = await app.config.update_customer_data_format(format.format)
-    if not updated_format:
-        raise HTTPException(status_code=404, detail="Customer data format not found")
-    return updated_format
-
-@app.get("/configs/vendor/{vendor_name}")
-async def get_vendor_config(vendor_name: str):
-    config = await app.config.get_vendor_config(vendor_name)
-    if not config:
-        raise HTTPException(status_code=404, detail="Vendor config not found")
-    return config
 
 def main():
     try:
-        uvicorn.run("server:app", host="0.0.0.0", port=3001, reload=DEBUG)
+        uvicorn.run("server:app", host="0.0.0.0", port=4000, reload=DEBUG)
     except KeyboardInterrupt:
         pass
 

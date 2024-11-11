@@ -1,4 +1,3 @@
-version: '3.8'
 name: roshid-server
 
 services:
@@ -18,13 +17,13 @@ services:
       - ./backend:/usr/src/app
       - backend_data:/usr/src/app/data
     expose:
-      - "4000"
+      - "4000:4000"
     environment:
       - DEBUG=true
     env_file: ./.env
     command: python src/server.py
     depends_on:
-      - mongodb
+      - mongodb_container
 
   frontend:
     build: 
@@ -37,24 +36,25 @@ services:
       - frontend_next:/app/.next
     environment:
       - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://backend:4000/      
     ports:
       - "3000:3000"
     command: npm run dev 
     depends_on:
       - backend
 
-  mongodb:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    ports:
-      - "5000:27017"
-    volumes:
-      - mongodb_data:/data/db
+  mongodb_container:
+      image: mongo:latest
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      ports:
+        - 5000:27017
+      volumes:
+        - mongodb_data_container:/data/db
 
 volumes:
-  mongodb_data:
+  mongodb_data_container:
   backend_data:
   frontend_node_modules:
   frontend_next:
