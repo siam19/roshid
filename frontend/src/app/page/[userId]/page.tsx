@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { BlockRenderer } from '../../components/BlockRenderer'
+import { BlockRenderer } from '../../blocks/BlockRenderer'
 import { Skeleton } from "@/components/ui/skeleton"
 
 // This ensures the page is dynamically rendered for each request

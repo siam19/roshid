@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
+
 
 # Change ownership of the /app directory to the node user
 RUN chown -R node:node /app
