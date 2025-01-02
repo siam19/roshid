@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 import uvicorn
 import os
-from fastapi import FastAPI, HTTPException, Query, File, UploadFile, Depends
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile, Depends, Request
 from fastapi.responses import FileResponse
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,7 +13,6 @@ from datetime import datetime
 from bson import ObjectId
 from routers import pages, orders, products, users, delivery
 
-from dal import PagesDAL, UsersDAL
 from classes import CreateOrderRequest
 import logging
 
@@ -40,13 +39,7 @@ async def lifespan(app: FastAPI):
         raise Exception("Cluster connection is not okay!")
     
 
-    product_list = database.get_collection("products")
-    users_list = database.get_collection("users")
-    app.pages_dal = PagesDAL(database.get_collection("pages"))
-
-    app.users_dal = UsersDAL(users_list)
-    
-    app.delivery_interface = DeliveryInterface()
+    app.pages_dal = pages.PagesDAL(database.get_collection("pages"))
 
 
     # Yield back to FastAPI Application:
@@ -65,11 +58,12 @@ app.add_middleware(
 )
 
 
+
 # Include routers
 app.include_router(pages.router, tags=["pages"])
-app.include_router(orders.router, tags=["orders"])
-app.include_router(products.router, tags=["products"])
-app.include_router(users.router, tags=["users"])
+# app.include_router(orders.router, tags=["orders"])
+# app.include_router(products.router, tags=["products"])
+# app.include_router(users.router, tags=["users"])
 app.include_router(delivery.router, tags=["delivery"])
 
 

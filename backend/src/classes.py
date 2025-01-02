@@ -13,15 +13,6 @@ from uuid import uuid4
 
 
 
-class Block(BaseModel):
-    block_type: str  # Could be made into Enum if types are fixed
-    block_content: dict
-
-class Page(BaseModel):
-    text: str
-    images: List[str]
-    products: List[str]  # List of product IDs
-    blocks: List[Block]
 
 class ProductContent(BaseModel):
     name: str

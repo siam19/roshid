@@ -3,7 +3,7 @@ from typing import Dict
 from plugins.delivery_api import DeliveryInterface, DeliveryInfo
 router = APIRouter()
 
-@router.post("/delivery/{service_name}/create")
+@router.post("/delivery/{service_name}/request")
 async def create_pickup_request(service_name: str, delivery_info: DeliveryInfo):
     delivery = DeliveryInterface()
     delivery.authenticate()

@@ -10,49 +10,13 @@ from utils.exceptions import RoshidError, RoshidAttributeError
 from datetime import datetime
 import re
 
-from classes import CreateOrderRequest, CustomerInfo, Product, Page, Block, ProductContent
+from classes import CreateOrderRequest
 import os
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 #DAL stands for Data Access Layer. The DAL is responsible for handling all interactions with the database.
 
 
-class PagesDAL:
-    def __init__(self, collection: AsyncIOMotorCollection):
-        self.collection = collection
-
-    async def create_page(self, page_data: dict) -> str:
-        page_id = simple_uuid(12)
-        page_data["_id"] = page_id
-        page_data["created_at"] = datetime.now(datetime.utc)
-        
-        try:
-            await self.collection.insert_one(page_data)
-            return page_id
-        except Exception as e:
-            raise RoshidError(f"Failed to create page: {str(e)}")
-
-    async def update_page(self, page_id: str, page_data: dict) -> bool:
-        try:
-            result = await self.collection.update_one(
-                {"_id": page_id},
-                {"$set": {
-                    **page_data,
-                    "updated_at": datetime.now(datetime.utc)
-                }}
-            )
-            return result.modified_count > 0
-        except Exception as e:
-            raise RoshidError(f"Failed to update page: {str(e)}")
-
-    async def get_page_content(self, page_id: str) -> dict:
-        try:
-            page = await self.collection.find_one({"_id": page_id})
-            if not page:
-                raise HTTPException(status_code=404, detail="Page not found")
-            return page
-        except Exception as e:
-            raise RoshidError(f"Failed to get page: {str(e)}")
 
 class OrderDAL:
     def __init__(self, collection: AsyncIOMotorCollection):
