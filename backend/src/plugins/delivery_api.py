@@ -5,6 +5,8 @@ from plugin_manager import PluginManager
 import plugins
 import logging
 
+from classes import DeliveryInfo
+
 
 class DeliveryAPI(ABC):
     @abstractmethod
@@ -20,7 +22,6 @@ class DeliveryAPI(ABC):
         pass
 
 
-from classes import DeliveryInfo
 
 
 class DeliveryInterface:
@@ -38,7 +39,7 @@ class DeliveryInterface:
 
     #TODO This isnt production ready
 
-    def authenticate(self, users_dal=None):
+    def authenticate(self, users_dalx   =None):
         # enabled_plugins = user.get_enabled_delivery_services()
         
         service = self.plugins.get('steadfast')

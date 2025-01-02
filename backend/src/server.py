@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from bson import ObjectId
-from routers import pages, orders, products, users
+from routers import pages, orders, products, users, delivery
 
 from dal import PagesDAL, UsersDAL
 from classes import CreateOrderRequest
@@ -70,6 +70,7 @@ app.include_router(pages.router, tags=["pages"])
 app.include_router(orders.router, tags=["orders"])
 app.include_router(products.router, tags=["products"])
 app.include_router(users.router, tags=["users"])
+app.include_router(delivery.router, tags=["delivery"])
 
 
 

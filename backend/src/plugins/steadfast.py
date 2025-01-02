@@ -8,7 +8,7 @@ import json
 from pydantic import BaseModel, Field
 from typing import Optional
 
-
+from utils.custom_uuid import CustomUUID
 
 
 class SteadfastDeliveryInfo(BaseModel):
@@ -41,7 +41,7 @@ class SteadfastAPI(DeliveryAPI):
         Place an order using the Steadfast API.
 
         Args:
-            delivery_info (SteadfastDeliveryInfo): Pydantic model containing required delivery information
+            delivery_info (DeliveryInfo): Pydantic model containing delivery information
 
         Returns:
             dict: The API response as a dictionary
@@ -52,7 +52,18 @@ class SteadfastAPI(DeliveryAPI):
             "Secret-Key": self.secret_key,
             "Content-Type": "application/json"
         }
-        payload = delivery_info.model_dump(exclude_none=True)
+
+        # Transform DeliveryInfo into SteadfastDeliveryInfo
+        steadfast_delivery_info = SteadfastDeliveryInfo(
+            invoice=CustomUUID(4).uuid_str, # Generate a simple unique invoice ID
+            recipient_name=delivery_info.name,
+            recipient_phone=delivery_info.phone,
+            recipient_address=delivery_info.address,
+            cod_amount="0", # Default to 0 since DeliveryInfo doesn't have this field
+            note=delivery_info.instructions
+        )
+        
+        payload = steadfast_delivery_info.model_dump(exclude_none=True)
         logging.info(payload)
         try:
             response = requests.post(endpoint, json=payload, headers=self.headers)

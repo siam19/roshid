@@ -10,7 +10,7 @@ from utils.exceptions import RoshidError, RoshidAttributeError
 from datetime import datetime
 import re
 
-from classes import CreateOrderRequest, CustomerInfo, Product, Page, Block, Order, ProductContent
+from classes import CreateOrderRequest, CustomerInfo, Product, Page, Block, ProductContent
 import os
 
 from fastapi import HTTPException
