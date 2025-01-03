@@ -8,6 +8,7 @@ from utils.exceptions import RoshidError
 from motor.motor_asyncio import AsyncIOMotorCollection
 from fastapi import APIRouter, Depends, HTTPException, Header
 
+from routers.stores import get_stores_dal, StoresDAL
 
 class BlockContent(BaseModel):
     pass
@@ -48,6 +49,7 @@ class PagesDAL:
         for block in page_data.get("blocks"):
             block["id"] = simple_uuid(4)
         page_data["_id"] = page_id
+        page_data["store_id"] = store_id
         page_data["created_at"] = datetime.now()
         
         try:
@@ -145,12 +147,34 @@ def get_pages_dal(request: Request):
 async def create_page(
     page_data: Page,
     store_id: str = Header(...),
+    pages_dal: PagesDAL = Depends(get_pages_dal),
+    store_dal: StoresDAL = Depends(get_stores_dal)
+):
+    
+    # check store collection for store_id
+    
+    store = await store_dal.get_store(store_id)
+    if not store:
+        raise HTTPException(status_code=404, detail="Store not found")
+    else:
+        page_id = await pages_dal.create_page(page_data, store_id)
+        
+        await store_dal.add_page(store_id, page_id)
+        
+        return {"page_id": page_id,
+                "store_id": store_id}
+
+@router.get("/page/{page_id}")
+async def get_page(
+    page_id: str,
     pages_dal: PagesDAL = Depends(get_pages_dal)
 ):
-    page_id = await pages_dal.create_page(page_data, store_id)
-    return {"page_id": page_id,
-            "store_id": store_id}
-
+    try:
+        page = await pages_dal.get_page_content(page_id)
+        return page
+    except RoshidError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 
 @router.post("/page/blocks/add")
 async def add_block(

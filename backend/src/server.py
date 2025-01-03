@@ -11,9 +11,8 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 from bson import ObjectId
-from routers import pages, orders, products, users, delivery
+from routers import pages, orders, products, users, delivery, stores
 
-from classes import CreateOrderRequest
 import logging
 
 from plugins.delivery_api import DeliveryInterface
@@ -40,7 +39,13 @@ async def lifespan(app: FastAPI):
     
 
     app.pages_dal = pages.PagesDAL(database.get_collection("pages"))
-
+    
+    app.products_dal = products.ProductDAL(
+        database.get_collection("products"),
+        database.get_collection("stock"),
+        database.get_collection("inventory_transactions")
+    )
+    app.stores_dal = stores.StoresDAL(database.get_collection("stores"))
 
     # Yield back to FastAPI Application:
     yield
@@ -62,8 +67,8 @@ app.add_middleware(
 # Include routers
 app.include_router(pages.router, tags=["pages"])
 # app.include_router(orders.router, tags=["orders"])
-# app.include_router(products.router, tags=["products"])
-# app.include_router(users.router, tags=["users"])
+app.include_router(products.router, tags=["products"])
+app.include_router(stores.router, tags=["stores"])
 app.include_router(delivery.router, tags=["delivery"])
 
 

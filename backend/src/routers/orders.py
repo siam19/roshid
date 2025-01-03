@@ -2,51 +2,35 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from classes import DeliveryInfo
 from typing import List
 from classes import CreateOrderRequest, DeliveryInfo
+from pydantic import BaseModel
+
+
+
 router = APIRouter()
 
-@router.get("/orders")
-async def get_all_orders():
-    orders = await app.order_dal.get_all_orders()
-    return orders
+class Store(BaseModel):
+    id: str
+    store_name: str
+    phone: str
+    delivery_methods: List[str]
+    products: List[str]
+    pages: List[str]
+    user_id: str
 
-@router.post("/orders/create")
-async def create_order(request: Request, delivery_info: DeliveryInfo | None, delivery_service_name: str|None):
-    delivery_interface = request.app.delivery_interface
+class CreateStoreRequest(BaseModel):
+    store_name: str
+    phone: str
+    delivery_methods: List[str]
+    user_id: str
 
-    delivery_interface.authenticate()
-
-    # Partial order creation
-
-    # Send Pickup Request
-    consignment_info = delivery_interface.create_pickup_request(delivery_info, delivery_service_name)
-
-    return consignment_info
-
-    # if delivery_service:
-    #     result = delivery_service.create_order(delivery_info)
-    #     return result
-    # else:
-    #     return {"error": f"Delivery service '{delivery_service_name}' not found"}
-    
+def get_pages_dal(request: Request):
+    return request.app.stores_dal
 
 
-    
-@router.get("/orders/{order_id}")
-async def get_order(order_id: str):
-    order = await app.order_dal.get_order(order_id)
-    return order
-
-@router.delete("/orders/{order_id}")
-async def delete_order(order_id: str):
-    await app.order_dal.delete_order(order_id)
-    return {"status": "success"}
-
-@router.post("/orders/{order_id}/deliver")
-async def deliver_order(order_id: str):
-    result = await app.delivery_dal.process_delivery(order_id)
-    return result
-
-@router.get("/orders/{order_id}/status")
-async def get_order_status(order_id: str):
-    status = await app.order_dal.get_order_status(order_id)
-    return {"status": status}
+@router.post("/store/create")
+async def create_store(
+        store: CreateStoreRequest,
+        request: Request
+    ):
+    store_id = request.app.store_dal.create_store(store)
+    return {"store_id": store_id}
