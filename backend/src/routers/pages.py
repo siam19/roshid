@@ -164,6 +164,7 @@ async def create_page(
         return {"page_id": page_id,
                 "store_id": store_id}
 
+
 @router.get("/page/{page_id}")
 async def get_page(
     page_id: str,

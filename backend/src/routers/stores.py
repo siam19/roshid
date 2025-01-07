@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
-from classes import DeliveryInfo
 from typing import List
-from classes import CreateOrderRequest, DeliveryInfo
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorCollection
 from utils.custom_uuid import CustomUUID

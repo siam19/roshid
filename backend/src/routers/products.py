@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
-from typing import List, Dict
+from typing import List, Dict, Literal
 from pydantic import BaseModel, Field
 from utils.uuid import simple_uuid
 from utils.exceptions import RoshidError
@@ -8,17 +8,44 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from datetime import datetime
 from routers.stores import get_stores_dal, StoresDAL
 
+
+
+## Order Form
+
+class FormElement(BaseModel):
+    type: Literal["text", "phone", "long_text", "select", "checkbox"]
+    label: str
+    required: bool
+
+
+class OrderForm(BaseModel):
+    elements: List[FormElement] = [
+        FormElement(type="text", label="Full Name", required=True),
+        FormElement(type="phone", label="Phone Number", required=True),
+        FormElement(type="long_text", label="Address", required=True),
+        FormElement(type="text", label="Delivery Instructions", required=False),
+    ]
+
+    def add_element(self, element: FormElement):
+        self.elements.append(element)
+    
+    def remove_element(self, element: FormElement):
+        self.elements.remove(element)
+
+# Products
+
+
 class ProductContent(BaseModel):
     name: str
     description: str 
     images: List[str]
 
 class Product(BaseModel):
-    id: str 
     availability: bool
     price: float
     content: ProductContent
     delivery_method: str
+    order_form: OrderForm = OrderForm()
 
 class CreateProductRequest(BaseModel):
     availability: bool
@@ -37,6 +64,8 @@ class CreateStockRequest(BaseModel):
     quantity: int
     minimum_quantity: int
 
+
+
 from typing import Literal
 
 class InventoryTransaction(BaseModel):
@@ -45,6 +74,10 @@ class InventoryTransaction(BaseModel):
     quantity: int
     created: float
     method: Literal["STOCK_UPDATE", "ORDER"]
+
+
+
+
 
 class ProductDAL:
     def __init__(
@@ -66,11 +99,18 @@ class ProductDAL:
 
         ) -> str:
         product_id = simple_uuid(8)
-        product_doc = {
-            "_id": product_id,
-            "store_id": store_id,
-            **product.model_dump()
-        }
+      
+        product_instance = Product(
+        
+            availability=product.availability,
+            price=product.price,
+            content=product.content,
+            delivery_method=product.delivery_method
+        )
+        
+        product_doc = product_instance.model_dump()
+        product_doc["_id"] = product_id
+        product_doc["store_id"] = store_id
 
         try:
             await self.collection.insert_one(product_doc)
@@ -79,6 +119,7 @@ class ProductDAL:
             return product_id
         except Exception as e:
             raise RoshidError(f"Failed to create product: {str(e)}")
+        
 
     async def get_product(self, product_id: str) -> dict:
         try:

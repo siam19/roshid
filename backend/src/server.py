@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
         database.get_collection("inventory_transactions")
     )
     app.stores_dal = stores.StoresDAL(database.get_collection("stores"))
-
+    app.orders_dal = orders.OrdersDAL(database.get_collection("orders"))
     # Yield back to FastAPI Application:
     yield
 
@@ -66,7 +66,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(pages.router, tags=["pages"])
-# app.include_router(orders.router, tags=["orders"])
+app.include_router(orders.router, tags=["orders"])
 app.include_router(products.router, tags=["products"])
 app.include_router(stores.router, tags=["stores"])
 app.include_router(delivery.router, tags=["delivery"])

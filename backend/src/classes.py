@@ -26,15 +26,6 @@ class Product(BaseModel):
     content: ProductContent
     delivery_method: str
 
-class CustomerInfo(BaseModel):
-    name: str
-    phone: str
-    address: str
-
-class CreateOrderRequest(BaseModel):
-    customer_info: CustomerInfo
-    products: List[str]  # List of product IDs
-    delivery_method: str
 
 class UserSettings(BaseModel):
     # Flexible structure for config and integration credentials
