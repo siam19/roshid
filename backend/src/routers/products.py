@@ -222,6 +222,17 @@ async def create_product(
     return {"product_id": product_id}
 
 
+
+@router.get("/products/all")
+async def get_all_products(
+    products_dal: ProductDAL = Depends(get_products_dal)
+):
+    products = []
+    async for product in products_dal.collection.find():
+        product["_id"] = str(product["_id"])
+        products.append(product)
+    return products
+
 class GetProductsRequest(BaseModel):
     product_ids: List[str]
 

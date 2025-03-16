@@ -1,16 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/api/:path*',
-      },
-    ]
-  },
-  images: {
-    domains: ['storage.example.com'],
-  },
-}
+import type { NextConfig } from "next";
 
-module.exports = nextConfig
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
