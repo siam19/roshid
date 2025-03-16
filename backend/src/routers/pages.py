@@ -38,7 +38,6 @@ class Page(BaseModel):
     blocks: List[Block]
 
 
-
 class PagesDAL:
     def __init__(self, collection: AsyncIOMotorCollection):
         self.collection = collection

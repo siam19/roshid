@@ -36,10 +36,28 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://backend:4000/
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      # - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      # - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     ports:
       - "3000:3000"
+    command: npm run dev 
+    depends_on:
+      - backend
+
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./webapp:/app
+      - /app/node_modules
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://backend:4000/
+    ports:
+      - "3001:3001"
     command: npm run dev 
     depends_on:
       - backend

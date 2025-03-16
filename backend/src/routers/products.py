@@ -7,7 +7,7 @@ from fastapi import Request
 from motor.motor_asyncio import AsyncIOMotorCollection
 from datetime import datetime
 from routers.stores import get_stores_dal, StoresDAL
-
+import json
 
 
 ## Order Form
@@ -222,15 +222,20 @@ async def create_product(
     return {"product_id": product_id}
 
 
-@router.get("/products/{product_id}")
-async def get_product(
-        product_id: str,
-        products_dal: ProductDAL = Depends(get_products_dal)
-    ):
-    product = await products_dal.get_product(product_id)
-    product["_id"] = str(product["_id"])
-    return product
+class GetProductsRequest(BaseModel):
+    product_ids: List[str]
 
+@router.post("/products")
+async def get_products(
+    request: GetProductsRequest,
+    products_dal: ProductDAL = Depends(get_products_dal)
+):
+    products = []
+    for product_id in request.product_ids:
+        product = await products_dal.get_product(product_id)
+        product["_id"] = str(product["_id"])
+        products.append(product)
+    return products
 
 @router.post("/products/{product_id}/stock/add")
 async def add_stock(
