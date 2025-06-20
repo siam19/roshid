@@ -10,7 +10,10 @@
 			<SignInButton />
 		</SignedOut>
 		<SignedIn>
-            Heyy
+            Welcome to the new Roshid, bitches!!!
 			<UserButton />
+
+            <a href="/logged">Go to Logged In Page</a>
+
 		</SignedIn>
 	</header>
